@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "bun run --hot src/server.ts",
+    "build:api": "bun build src/api.ts --outdir dist --minify",
     "db:push": "bun drizzle-kit push",
     "db:studio": "bun drizzle-kit studio",
     "db:seed": "bun run --bun src/db/seed.ts"
