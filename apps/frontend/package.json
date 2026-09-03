@@ -1,0 +1,8 @@
+{
+  "name": "@pos/frontend",
+  "private": true,
+  "dependencies": {
+    "@pos/backend": "workspace:*",
+    "@types/bun": "latest"
+  }
+}

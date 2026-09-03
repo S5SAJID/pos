@@ -1,0 +1,13 @@
+{
+  "name": "learn-pos",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "typescript": "latest"
+  }
+}

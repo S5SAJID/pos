@@ -1,0 +1,9 @@
+{
+  "name": "@pos/shared",
+  "type": "module",
+  "main": "./index.ts",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  }
+}
