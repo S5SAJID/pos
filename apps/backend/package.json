@@ -2,6 +2,7 @@
   "name": "@pos/backend",
   "private": true,
   "main": "./exports.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./exports.ts",
