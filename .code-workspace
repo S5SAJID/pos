@@ -1,0 +1,27 @@
+{
+  "folders": [
+    {
+      "name": "Frontend App",
+      "path": "apps/frontend",
+    },
+    {
+      "name": "Backend App",
+      "path": "apps/backend",
+    },
+    {
+      "name": "Root Configs",
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "files.exclude": {
+      // Hides other workspace projects from the Root Configs folder view
+      "apps/": true,
+      "packages/": true,
+
+      // Traditional noise reduction for the Root view
+      "node_modules/": true,
+      ".git/": true,
+    },
+  },
+}

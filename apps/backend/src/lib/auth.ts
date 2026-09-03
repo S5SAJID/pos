@@ -4,11 +4,21 @@ import { db } from "../db";
 import * as schema from "../db/schema";
 
 export const auth = betterAuth({
+  telemetry: {
+    enabled: false,
+  },
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    },
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
   }),
-  trustedOrigins: [Bun.env.FRONTEND_URL ?? "http://localhost:5000"],
+  trustedOrigins: [Bun.env.FRONTEND_URL ?? "https://localhost:3000"],
   emailAndPassword: {
     enabled: true,
   },
