@@ -8,5 +8,9 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
-  "tailwindCSS.experimental.configFile": "tailwind.config.js"
+  "js/ts.experimental.useTsgo": false,
+  "js/ts.tsdk.path": "./node_modules/typescript",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  }
 }
