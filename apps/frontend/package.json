@@ -10,6 +10,7 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
+    "astryx": "bun run ../../node_modules/@astryxdesign/cli/clients/cli/bin/astryx.mjs",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
     "check": "prettier --check ."
