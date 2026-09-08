@@ -1,6 +1,5 @@
 import TableSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
-import { useDebounce } from '#/lib/use-debounce'
 import { Button } from '@astryxdesign/core/Button'
 import { Center } from '@astryxdesign/core/Center'
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
@@ -28,13 +27,12 @@ import {
   type TableColumn,
 } from '@astryxdesign/core/Table'
 import { Text } from '@astryxdesign/core/Text'
-import { TextInput } from '@astryxdesign/core/TextInput'
 import { Token } from '@astryxdesign/core/Token'
 import { Toolbar } from '@astryxdesign/core/Toolbar'
 import type { PaymentMethod, Product, Transaction } from '@pos/backend'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { ReceiptText, SearchIcon } from 'lucide-react'
+import { ReceiptText } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/_app/orders')({
@@ -99,30 +97,19 @@ const ORDER_STATUS_OPTIONS = [
 ]
 
 function RouteComponent() {
-  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState('ALL')
   const [orderStatus, setOrderStatus] = useState('ALL')
   const [selectedOrder, setSelectedOrder] = useState<RespTransaction | null>(
     null,
   )
-
-  const searchDebounced = useDebounce(search, 500)
-
   const { sortConfig } = useTableSortableState<RespTransaction>({
     data: [],
   })
   const sortablePlugin = useTableSortable<RespTransaction>(sortConfig)
 
-  const { data, isLoading, isError, isFetching } = useQuery<OrdersResponse>({
-    queryKey: [
-      'transactions',
-      page,
-      sortConfig,
-      searchDebounced,
-      paymentMethod,
-      orderStatus,
-    ],
+  const { data, isLoading, isError } = useQuery<OrdersResponse>({
+    queryKey: ['transactions', page, sortConfig, paymentMethod, orderStatus],
     queryFn: async () => {
       const res = await backendClient.data.transactions.$get({
         query: {
@@ -139,10 +126,6 @@ function RouteComponent() {
           ...(orderStatus !== 'ALL' && {
             'filters[status]': orderStatus,
           }),
-          ...(searchDebounced !== '' &&
-            searchDebounced.length > 2 && {
-              search: searchDebounced.toLowerCase(),
-            }),
         },
       })
       return await res.json()
@@ -197,11 +180,6 @@ function RouteComponent() {
       }
     })
   }, [rawOrderItems, productsMap])
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    setPage(1)
-  }
 
   const plugin = useTablePagination<RespTransaction>({
     page,
@@ -306,17 +284,6 @@ function RouteComponent() {
                   label="Order filters"
                   size="sm"
                   dividers={['bottom', 'top']}
-                  startContent={
-                    <TextInput
-                      label="Search orders"
-                      isLabelHidden
-                      placeholder="Search..."
-                      value={search}
-                      onChange={handleSearchChange}
-                      isLoading={isFetching}
-                      startIcon={SearchIcon}
-                    />
-                  }
                   endContent={
                     <HStack gap={2} vAlign="center">
                       <Selector
