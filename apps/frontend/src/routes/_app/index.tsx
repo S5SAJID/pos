@@ -55,6 +55,10 @@ function RouteComponent() {
     )
   }
 
+  const filteredProducts = data.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase()),
+  )
+
   return (
     <Layout
       height="fill"
@@ -67,50 +71,66 @@ function RouteComponent() {
                 startIcon={<Icon icon={Search} />}
                 label="Search products"
                 value={search}
-                placeholder="Search Products"
-                onChange={(value) => setSearch(value)}
+                placeholder="Search Products by name"
+                onChange={setSearch}
                 isLabelHidden
               />
             </HStack>
-            <Grid columns={{ minWidth: 200, repeat: 'fill', max: 6 }} gap={2}>
-              {data.map((product) => {
-                const quantity = product.quantity ?? 0
-                const minStock = product.minStockLevel ?? 3
-                const isOutOfStock = quantity <= 0
-                const isLowStock = quantity < minStock
+            {filteredProducts.length > 0 ? (
+              <Grid columns={{ minWidth: 200, repeat: 'fill', max: 6 }} gap={2}>
+                {filteredProducts.map((product) => {
+                  const quantity = product.quantity ?? 0
+                  const minStock = product.minStockLevel ?? 3
+                  const isOutOfStock = quantity <= 0
+                  const isLowStock = quantity < minStock
 
-                return (
-                  <ClickableCard
-                    style={{ userSelect: 'none' }}
-                    key={product.id}
-                    label={product.name}
-                    isDisabled={isOutOfStock}
-                  >
-                    <VStack gap={0.5}>
-                      <VStack gap={1}>
-                        {isOutOfStock ? (
-                          <HStack gap={1} vAlign="center">
-                            <StatusDot variant="error" label="Sold out" />
-                            <Text type="supporting">Sold out</Text>
-                          </HStack>
-                        ) : isLowStock ? (
-                          <HStack gap={1} vAlign="center">
-                            <StatusDot variant="warning" label="Low stock" />
-                            <Text type="supporting">
-                              Low stock ({quantity} left)
-                            </Text>
-                          </HStack>
-                        ) : (
-                          <Text type="supporting">{quantity + ' left'}</Text>
-                        )}
-                        <Text weight="bold">{product.name}</Text>
+                  return (
+                    <ClickableCard
+                      style={{ userSelect: 'none' }}
+                      key={product.id}
+                      label={product.name}
+                      isDisabled={isOutOfStock}
+                    >
+                      <VStack gap={0.5}>
+                        <VStack gap={1}>
+                          {isOutOfStock ? (
+                            <HStack gap={1} vAlign="center">
+                              <StatusDot variant="error" label="Sold out" />
+                              <Text type="supporting">Sold out</Text>
+                            </HStack>
+                          ) : isLowStock ? (
+                            <HStack gap={1} vAlign="center">
+                              <StatusDot variant="warning" label="Low stock" />
+                              <Text type="supporting">
+                                Low stock ({quantity} left)
+                              </Text>
+                            </HStack>
+                          ) : (
+                            <Text type="supporting">{quantity + ' left'}</Text>
+                          )}
+                          <Text weight="bold">{product.name}</Text>
+                        </VStack>
+                        <Text type="label">Rs. {product.price}</Text>
                       </VStack>
-                      <Text type="label">Rs. {product.price}</Text>
-                    </VStack>
-                  </ClickableCard>
-                )
-              })}
-            </Grid>
+                    </ClickableCard>
+                  )
+                })}
+              </Grid>
+            ) : (
+              <Center>
+                <EmptyState
+                  icon={<Icon icon={Search} />}
+                  title="No results found"
+                  description="Try adjusting your search or filters to find what you need."
+                  actions={
+                    <Button
+                      onClick={() => setSearch('')}
+                      label="Clear search"
+                    />
+                  }
+                />
+              </Center>
+            )}
           </VStack>
         </LayoutContent>
       }

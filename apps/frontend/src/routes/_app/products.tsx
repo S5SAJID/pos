@@ -33,8 +33,8 @@ export const Route = createFileRoute('/_app/products')({
 })
 
 type RespProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
-  quantity: number | null
-  minStockLevel: number | null
+  quantity: number
+  minStockLevel: number
   createdAt: string
   updatedAt: string
 }
@@ -48,6 +48,7 @@ function RouteComponent() {
     },
   })
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
 
   const pageSize = 20
   const plugin = useTablePagination<RespProduct>({
@@ -56,14 +57,22 @@ function RouteComponent() {
     totalItems: data?.length ?? 0,
     pageSize,
   })
-  const { sortedData, sortConfig } = useTableSortableState<RespProduct>({
-    data: data ?? [],
-  })
-  const sortablePlugin = useTableSortable<RespProduct>(sortConfig)
 
   if (isError) {
     return <div>Error loading data.</div>
   }
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPage(1)
+  }
+
+  const { sortedData, sortConfig } = useTableSortableState<RespProduct>({
+    data: (data ?? []).filter((item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()),
+    ),
+  })
+  const sortablePlugin = useTableSortable<RespProduct>(sortConfig)
 
   return (
     <Layout
@@ -86,9 +95,9 @@ function RouteComponent() {
                   <TextInput
                     label="Search"
                     isLabelHidden
-                    placeholder="Search..."
-                    value={'search'}
-                    // onChange={setSearch}
+                    placeholder="Search by name..."
+                    value={search}
+                    onChange={handleSearchChange}
                     startIcon={SearchIcon}
                   />
                 }
@@ -156,7 +165,7 @@ const productColumns: TableColumn<RespProduct>[] = [
     align: 'end',
     sortable: true,
     width: proportional(1),
-    renderCell: (item) => item.quantity ?? 0,
+    renderCell: (item) => item.quantity,
   },
   {
     key: 'minStockLevel',
@@ -164,7 +173,7 @@ const productColumns: TableColumn<RespProduct>[] = [
     align: 'end',
     sortable: true,
     width: proportional(1),
-    renderCell: (item) => item.minStockLevel ?? 'N/A',
+    renderCell: (item) => item.minStockLevel,
   },
   {
     key: 'createdAt',

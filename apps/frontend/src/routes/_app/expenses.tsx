@@ -1,5 +1,6 @@
 import SkeletonTableRowSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
+import { useDebounce } from '#/lib/use-debounce'
 import { Badge, type BadgeVariant } from '@astryxdesign/core/Badge'
 import { Button } from '@astryxdesign/core/Button'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
@@ -36,7 +37,7 @@ type RespExpense = Omit<Expense, 'createdAt'> & {
   createdAt: string
 }
 
-type ExpensesResponce = {
+type ExpensesResponse = {
   results: RespExpense[]
   page: number
   limit: number
@@ -44,37 +45,51 @@ type ExpensesResponce = {
   pages: number
 }
 
+const PAGE_SIZE = 20
+
 function RouteComponent() {
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const searchDebounced = useDebounce(search, 500)
   const { sortConfig } = useTableSortableState<RespExpense>({
     data: [],
   })
 
   const sortablePlugin = useTableSortable<RespExpense>(sortConfig)
 
-  const { data, isLoading, isError, isFetching } = useQuery<ExpensesResponce>({
-    queryKey: ['expenses', page, sortConfig],
+  const { data, isLoading, isError, isFetching } = useQuery<ExpensesResponse>({
+    queryKey: ['expenses', page, sortConfig, searchDebounced],
     queryFn: async () => {
       const data = await backendClient.data.expenses.$get({
         query: {
           page: page.toString(),
-          limit: pageSize.toString(),
+          limit: PAGE_SIZE.toString(),
           ...(sortConfig.sort[0] && {
             'orderBy[0][field]': sortConfig.sort[0].sortKey,
-            'orderBy[0][direction]': sortConfig.sort[0].direction === "ascending" ? "asc" : "desc",
+            'orderBy[0][direction]':
+              sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
           }),
+          ...(searchDebounced !== '' &&
+            searchDebounced.length > 2 && {
+              search: searchDebounced.toLowerCase(),
+            }),
         },
       })
       return await data.json()
     },
   })
 
-  const pageSize = 20
+  // reset to page 1 automatically when user starts searching
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPage(1)
+  }
+
   const plugin = useTablePagination<RespExpense>({
     page,
     onPageChange: setPage,
     totalItems: data ? data.limit * data.pages : 0,
-    pageSize,
+    pageSize: PAGE_SIZE,
   })
 
   if (isError) {
@@ -103,13 +118,14 @@ function RouteComponent() {
                     label="Search"
                     isLabelHidden
                     placeholder="Search..."
-                    value={'search'}
-                    // onChange={setSearch}
+                    value={search}
+                    onChange={handleSearchChange}
+                    isLoading={isFetching}
                     startIcon={SearchIcon}
                   />
                 }
               />
-              {isLoading || isFetching ? (
+              {isLoading ? (
                 <SkeletonTableRowSkeleton columns={expenseColumns} />
               ) : data ? (
                 <Table
