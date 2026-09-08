@@ -14,6 +14,7 @@ export const expenseCrud = createCrud(expenses, {
 });
 
 export const transactionsCrud = createCrud(transactions, {
+  searchFields: ["id"],
   defaultLimit: 15,
   allowedFilters: ["status", "paymentMethod"],
 });
