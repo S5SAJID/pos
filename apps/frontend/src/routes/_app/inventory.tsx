@@ -1,3 +1,4 @@
+import { StockStatus, computeStockStatus, type StockStatusType } from '#/components/stock-status.tsx'
 import TableSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
 import { Button } from '@astryxdesign/core/Button'
@@ -11,7 +12,7 @@ import {
   LayoutContent,
   VStack,
 } from '@astryxdesign/core/Layout'
-import { StatusDot } from '@astryxdesign/core/StatusDot'
+import { Selector } from '@astryxdesign/core/Selector'
 import {
   paginateData,
   proportional,
@@ -53,14 +54,22 @@ type EnrichedInventory = {
   sku: string
   quantity: number
   minStockLevel: number
-  stockStatus: 'out_of_stock' | 'low_stock' | 'in_stock'
+  stockStatus: StockStatusType
   createdAt: string
   updatedAt: string
 }
 
+const STATUS_OPTIONS = [
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'in_stock', label: 'In Stock' },
+  { value: 'low_stock', label: 'Low Stock' },
+  { value: 'out_of_stock', label: 'Out of Stock' },
+]
+
 function RouteComponent() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
 
   const {
     data: inventoryData,
@@ -86,50 +95,49 @@ function RouteComponent() {
     },
   })
 
-  const productsMap = useMemo(() => {
-    const map = new Map<string, RespProduct>()
-    if (productsData) {
-      for (const prod of productsData) {
-        map.set(prod.id, prod)
+  const enrichedData = useMemo<EnrichedInventory[]>(() => {
+    if (!productsData) return []
+    const inventoryMap = new Map<string, RespInventory>()
+    if (inventoryData) {
+      for (const inv of inventoryData) {
+        inventoryMap.set(inv.productId, inv)
       }
     }
-    return map
-  }, [productsData])
 
-  const enrichedData = useMemo<EnrichedInventory[]>(() => {
-    if (!inventoryData) return []
-    return inventoryData.map((item) => {
-      const product = productsMap.get(item.productId)
-      const productName = product?.name ?? 'Unknown Product'
-      const sku = product?.sku ?? '—'
-      const isOutOfStock = item.quantity <= 0
-      const isLowStock = !isOutOfStock && item.quantity <= item.minStockLevel
-      const stockStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
-        isOutOfStock ? 'out_of_stock' : isLowStock ? 'low_stock' : 'in_stock'
+    return productsData.map((product) => {
+      const inv = inventoryMap.get(product.id)
+      const quantity = inv?.quantity ?? product.quantity ?? 0
+      const minStockLevel = inv?.minStockLevel ?? product.minStockLevel ?? 0
+      const stockStatus = computeStockStatus(quantity, minStockLevel)
 
       return {
-        id: item.id,
-        productId: item.productId,
-        productName,
-        sku,
-        quantity: item.quantity,
-        minStockLevel: item.minStockLevel,
+        id: inv?.id ?? product.id,
+        productId: product.id,
+        productName: product.name,
+        sku: product.sku ?? '—',
+        quantity,
+        minStockLevel,
         stockStatus,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
+        createdAt: inv?.createdAt ?? product.createdAt,
+        updatedAt: inv?.updatedAt ?? product.updatedAt,
       }
     })
-  }, [inventoryData, productsMap])
+  }, [productsData, inventoryData])
 
   const filteredData = useMemo(() => {
     const q = search.toLowerCase().trim()
-    if (!q) return enrichedData
-    return enrichedData.filter(
-      (item) =>
+    return enrichedData.filter((item) => {
+      const matchesSearch =
+        !q ||
         item.productName.toLowerCase().includes(q) ||
-        (item.sku && item.sku.toLowerCase().includes(q)),
-    )
-  }, [enrichedData, search])
+        (item.sku && item.sku.toLowerCase().includes(q))
+
+      const matchesStatus =
+        statusFilter === 'ALL' || item.stockStatus === statusFilter
+
+      return matchesSearch && matchesStatus
+    })
+  }, [enrichedData, search, statusFilter])
 
   const pageSize = 20
   const plugin = useTablePagination<EnrichedInventory>({
@@ -146,6 +154,11 @@ function RouteComponent() {
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
+    setPage(1)
+  }
+
+  const handleStatusFilterChange = (val?: string) => {
+    setStatusFilter(val || 'ALL')
     setPage(1)
   }
 
@@ -189,19 +202,55 @@ function RouteComponent() {
                 size="sm"
                 dividers={['bottom', 'top']}
                 startContent={
-                  <TextInput
-                    label="Search inventory"
-                    isLabelHidden
-                    placeholder="Search by product name or SKU..."
-                    value={search}
-                    onChange={handleSearchChange}
-                    startIcon={SearchIcon}
-                  />
+                  <HStack gap={2} vAlign="center">
+                    <TextInput
+                      label="Search inventory"
+                      isLabelHidden
+                      hasClear={true}
+                      placeholder="Search by product name or SKU..."
+                      value={search}
+                      onChange={handleSearchChange}
+                      startIcon={SearchIcon}
+                    />
+                    <Selector
+                      label="Stock Status"
+                      isLabelHidden
+                      placeholder="Status"
+                      options={STATUS_OPTIONS}
+                      value={statusFilter}
+                      onChange={handleStatusFilterChange}
+                      size="sm"
+                      width={160}
+                    />
+                  </HStack>
                 }
               />
               {isLoading ? (
                 <TableSkeleton columns={inventoryColumns} />
-              ) : enrichedData.length > 0 ? (
+              ) : !enrichedData || enrichedData.length === 0 ? (
+                <EmptyState
+                  title="No inventory records found"
+                  description="Add products to your catalog to track and manage stock."
+                  icon={<Icon icon={Boxes} />}
+                />
+              ) : filteredData.length === 0 ? (
+                <EmptyState
+                  title="No matching inventory"
+                  description={`No items matched your search${statusFilter !== 'ALL' ? ' and filter' : ''}. Try adjusting your filters.`}
+                  icon={<Icon icon={SearchIcon} />}
+                  actions={
+                    <Button
+                      label="Clear filters"
+                      variant="secondary"
+                      onClick={() => {
+                        setSearch('')
+                        setStatusFilter('ALL')
+                        setPage(1)
+                      }}
+                    />
+                  }
+                />
+              ) : (
                 <Table
                   data={paginateData(sortedData, page, pageSize) ?? []}
                   columns={inventoryColumns}
@@ -210,49 +259,12 @@ function RouteComponent() {
                   hasHover
                   plugins={{ pagination: plugin, sortable: sortablePlugin }}
                 />
-              ) : (
-                <EmptyState
-                  title="No inventory records found"
-                  description="Add inventory records to manage your stock levels."
-                  icon={<Icon icon={Boxes} />}
-                />
               )}
             </VStack>
           </Card>
         </LayoutContent>
       }
     />
-  )
-}
-
-function StockStatusCell({
-  status,
-}: {
-  status: 'out_of_stock' | 'low_stock' | 'in_stock'
-}) {
-  if (status === 'out_of_stock') {
-    return (
-      <HStack gap={1.5} vAlign="center">
-        <StatusDot variant="error" label="Out of stock" />
-        <Text type="supporting">Out of stock</Text>
-      </HStack>
-    )
-  }
-
-  if (status === 'low_stock') {
-    return (
-      <HStack gap={1.5} vAlign="center">
-        <StatusDot variant="warning" label="Low stock" />
-        <Text type="supporting">Low stock</Text>
-      </HStack>
-    )
-  }
-
-  return (
-    <HStack gap={1.5} vAlign="center">
-      <StatusDot variant="success" label="In stock" />
-      <Text type="supporting">In stock</Text>
-    </HStack>
   )
 }
 
@@ -277,7 +289,11 @@ const inventoryColumns: TableColumn<EnrichedInventory>[] = [
     align: 'end',
     sortable: true,
     width: proportional(1),
-    renderCell: (item) => item.quantity,
+    renderCell: (item) => (
+      <Text type="body" hasTabularNumbers>
+        {item.quantity}
+      </Text>
+    ),
   },
   {
     key: 'minStockLevel',
@@ -285,14 +301,18 @@ const inventoryColumns: TableColumn<EnrichedInventory>[] = [
     align: 'end',
     sortable: true,
     width: proportional(1),
-    renderCell: (item) => item.minStockLevel,
+    renderCell: (item) => (
+      <Text type="body" color="secondary" hasTabularNumbers>
+        {item.minStockLevel}
+      </Text>
+    ),
   },
   {
     key: 'stockStatus',
     header: 'Status',
     sortable: true,
     width: proportional(1.5),
-    renderCell: (item) => <StockStatusCell status={item.stockStatus} />,
+    renderCell: (item) => <StockStatus status={item.stockStatus} />,
   },
   {
     key: 'updatedAt',
@@ -300,6 +320,7 @@ const inventoryColumns: TableColumn<EnrichedInventory>[] = [
     align: 'end',
     sortable: true,
     width: proportional(1.5),
-    renderCell: (item) => new Date(item.updatedAt).toLocaleDateString(),
+    renderCell: (item) =>
+      item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '—',
   },
 ]
