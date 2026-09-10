@@ -7,6 +7,7 @@ import type { HonoEnv } from "../middlewares/session-middleware";
 import { transactionSchema } from "../db/validators";
 import Qs from "qs";
 import { transactionsCrud } from "../db/crud";
+import { transactionsDB } from "../db/transactions-db";
 
 const app = new Hono<HonoEnv>()
   .get("/", async (c) => {
@@ -47,7 +48,7 @@ const app = new Hono<HonoEnv>()
     }
 
     try {
-      return await db.transaction(async (tx) => {
+      return await transactionsDB.transaction(async (tx) => {
         const selectedProducts = await tx
           .select()
           .from(products)
