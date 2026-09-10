@@ -43,7 +43,7 @@ export function printReciept(data: ReceiptData) {
 }
 
 function ReceiptDocument({ data }: { data: ReceiptData }) {
-  const { name, address, phone, currency } = shopConfig
+  const { name, address, phone, currency, tagline } = shopConfig
   const { orderId, items, total, paymentMethod, createdAt } = data
   const dateStr = createdAt.toLocaleDateString()
   const timeStr = createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -58,6 +58,7 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
     <div>
       {/* Header */}
       <div className="center bold large">{name}</div>
+      <div className="center bold">{tagline}</div>
       <div className="center">{address}</div>
       <div className="center">{phone}</div>
 
@@ -102,13 +103,15 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
 
       <div className="row bold">
         <span>TOTAL</span>
-        <span>{currency}{total.toFixed(2)}</span>
+        <span className='medium'>{currency}{total.toFixed(2)}</span>
       </div>
       <div className="row">
         <span>Payment</span>
         <span>{paymentLabel[paymentMethod] ?? paymentMethod}</span>
       </div>
 
+      <div className="divider" />
+      <div className="center small bold">{data.orderId}</div>
       <div className="divider" />
 
       <div className="center">Thank you for your purchase!</div>
@@ -134,9 +137,9 @@ const receiptStyles = `
 
 * {
   box-sizing: border-box;
-  font-family: 'Courier New', Courier, 'Consolas', monospace;
-  font-size: 11px;
-  line-height: 1.4;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'Courier New', monospace;
+  font-size: 9px;
+  line-height: 1.5;
   color: #000000;
   -webkit-print-color-adjust: exact;
 }
@@ -151,7 +154,10 @@ body {
 .center { text-align: center; margin-bottom: 2px; }
 .bold { font-weight: bold; }
 .large { font-size: 14px; margin-bottom: 2px; }
-.small { font-size: 10px; }
+.large { font-size: 14px; }
+.small {  } 
+
+.medium { font-size: 12px; }
 
 .divider {
   border-top: 1px dashed #000;

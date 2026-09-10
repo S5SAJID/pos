@@ -54,6 +54,7 @@ function RouteComponent() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
 
       const orderId =
         'transactionId' in data && typeof data.transactionId === 'string'
