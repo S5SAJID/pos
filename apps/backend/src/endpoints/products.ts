@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { HonoEnv } from "../middlewares/session-middleware";
 import { db } from "../db";
 import { inventory, products } from "../db/schema";
-import { eq, getColumns, sql } from "drizzle-orm";
+import { desc, eq, getColumns, sql } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { productSchema, productSelectSchema } from "../db/validators";
 
@@ -16,7 +16,7 @@ const app = new Hono<HonoEnv>()
       })
       .from(products)
       .leftJoin(inventory, eq(products.id, inventory.productId))
-      .where(eq(products.isDeleted, false));
+      .where(eq(products.isDeleted, false)).orderBy(desc(products.createdAt));
     return c.json(results);
   })
   .post("/", zValidator("json", productSchema), async (c) => {

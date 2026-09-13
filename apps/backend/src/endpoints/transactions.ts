@@ -21,10 +21,13 @@ const app = new Hono<HonoEnv>()
       },
     });
 
+    const orderBy = options.orderBy as any ?? [{ field: "createdAt", direction: "desc" }];
+
     const results = await transactionsCrud.list({
       ...options,
       page: Number(options.page) || 1,
       limit: Number(options.limit) || 15,
+      orderBy,
     });
 
     return c.json({ ...results, pages: Math.ceil(results.total / results.limit) });
