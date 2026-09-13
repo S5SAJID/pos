@@ -27,7 +27,10 @@ describe("Database Integration Tests", () => {
       price: "1450.00",
       cost: "1200.00",
     };
-    const [insertedProduct] = await db.insert(schema.products).values(productData).returning();
+    const [insertedProduct] = await db
+      .insert(schema.products)
+      .values(productData)
+      .returning();
     if (!insertedProduct) throw new Error("Product insertion failed");
     expect(insertedProduct).toBeDefined();
     expect(insertedProduct.id).toBeDefined();
@@ -62,7 +65,9 @@ describe("Database Integration Tests", () => {
       status: "PENDING",
     };
 
-    const validResult = createInsertSchema(schema.transactions).safeParse(validPayload);
+    const validResult = createInsertSchema(schema.transactions).safeParse(
+      validPayload,
+    );
     expect(validResult.success).toBe(true);
 
     if (validResult.success) {
@@ -96,7 +101,10 @@ describe("Database Integration Tests", () => {
       description: "Monthly shop rent",
     };
 
-    const [insertedExpense] = await db.insert(schema.expenses).values(expenseData).returning();
+    const [insertedExpense] = await db
+      .insert(schema.expenses)
+      .values(expenseData)
+      .returning();
     if (!insertedExpense) throw new Error("Expense insertion failed");
 
     expect(insertedExpense).toBeDefined();
@@ -105,8 +113,8 @@ describe("Database Integration Tests", () => {
       .select()
       .from(schema.expenses)
       .where(eq(schema.expenses.id, insertedExpense.id));
-      
-      if (!dbExpense) throw new Error("Expense fetch failed");
+
+    if (!dbExpense) throw new Error("Expense fetch failed");
 
     expect(dbExpense.amount).toBe(expenseData.amount);
     expect(dbExpense.category).toBe(expenseData.category);

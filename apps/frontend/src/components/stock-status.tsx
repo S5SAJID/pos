@@ -16,10 +16,7 @@ export const STOCK_STATUS_CONFIG: Record<
   in_stock: { variant: 'success', label: 'In stock' },
 }
 
-export function computeStockStatus(
-  quantity: number,
-  minStockLevel: number,
-): StockStatusType {
+export function computeStockStatus(quantity: number, minStockLevel: number): StockStatusType {
   if (quantity <= 0) return 'out_of_stock'
   if (quantity <= minStockLevel) return 'low_stock'
   return 'in_stock'
@@ -40,13 +37,10 @@ export function StockStatus({
   minStockLevel = 0,
   hasLabel = true,
   showQuantity = false,
-  hAlign="start"
+  hAlign = 'start',
 }: StockStatusProps) {
   const resolvedStatus: StockStatusType =
-    explicitStatus ??
-    (quantity !== undefined
-      ? computeStockStatus(quantity, minStockLevel)
-      : 'in_stock')
+    explicitStatus ?? (quantity !== undefined ? computeStockStatus(quantity, minStockLevel) : 'in_stock')
 
   const config = STOCK_STATUS_CONFIG[resolvedStatus]
 

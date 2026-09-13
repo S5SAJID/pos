@@ -3,7 +3,13 @@ import type { HonoEnv } from "../middlewares/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "../db";
 import { z } from "zod";
-import { expenses, inventory, products, transactionItems, transactions } from "../db/schema";
+import {
+  expenses,
+  inventory,
+  products,
+  transactionItems,
+  transactions,
+} from "../db/schema";
 import { and, between, desc, eq, lt, sql } from "drizzle-orm";
 import { getDateRange } from "../lib/util";
 
@@ -12,7 +18,10 @@ const app = new Hono<HonoEnv>().get(
   zValidator(
     "query",
     z.object({
-      period: z.enum(["today", "weekly", "monthly"]).optional().default("today"),
+      period: z
+        .enum(["today", "weekly", "monthly"])
+        .optional()
+        .default("today"),
     }),
   ),
   async (c) => {
@@ -33,7 +42,8 @@ const app = new Hono<HonoEnv>().get(
           .select({
             totalRevenue: sql<string>`COALESCE(SUM(${transactions.totalAmount}), 0)::text`,
             totalProfit: sql<string>`COALESCE(SUM(${transactions.grossProfit}), 0)::text`,
-            transactionCount: sql<number>`COUNT(${transactions.id})::int`.mapWith(Number),
+            transactionCount:
+              sql<number>`COUNT(${transactions.id})::int`.mapWith(Number),
             avgTransactionValue: sql<string>`COALESCE(AVG(${transactions.totalAmount}), 0)::text`,
           })
           .from(transactions)
@@ -52,16 +62,22 @@ const app = new Hono<HonoEnv>().get(
             sku: products.sku,
             currentStock: inventory.quantity,
             minStockLevel: inventory.minStockLevel,
-            deficit: sql<number>`${inventory.minStockLevel} - ${inventory.quantity}`.mapWith(
-              Number,
-            ),
+            deficit:
+              sql<number>`${inventory.minStockLevel} - ${inventory.quantity}`.mapWith(
+                Number,
+              ),
           })
           .from(inventory)
           .innerJoin(products, eq(inventory.productId, products.id))
           .where(
-            and(lt(inventory.quantity, inventory.minStockLevel), eq(products.isDeleted, false)),
+            and(
+              lt(inventory.quantity, inventory.minStockLevel),
+              eq(products.isDeleted, false),
+            ),
           )
-          .orderBy(desc(sql`${inventory.minStockLevel} - ${inventory.quantity}`))
+          .orderBy(
+            desc(sql`${inventory.minStockLevel} - ${inventory.quantity}`),
+          )
           .limit(20),
 
         // 3. Top selling products in the period
@@ -70,19 +86,29 @@ const app = new Hono<HonoEnv>().get(
             id: products.id,
             name: products.name,
             sku: products.sku,
-            unitsSold: sql<number>`COALESCE(SUM(${transactionItems.quantity}), 0)::int`.mapWith(
-              Number,
-            ),
+            unitsSold:
+              sql<number>`COALESCE(SUM(${transactionItems.quantity}), 0)::int`.mapWith(
+                Number,
+              ),
             revenue: sql<string>`COALESCE(SUM(${transactionItems.quantity} * ${transactionItems.unitPrice}), 0)::text`,
             transactionCount:
-              sql<number>`COUNT(DISTINCT ${transactionItems.transactionId})::int`.mapWith(Number),
+              sql<number>`COUNT(DISTINCT ${transactionItems.transactionId})::int`.mapWith(
+                Number,
+              ),
           })
           .from(transactionItems)
           .innerJoin(products, eq(transactionItems.productId, products.id))
-          .innerJoin(transactions, eq(transactionItems.transactionId, transactions.id))
+          .innerJoin(
+            transactions,
+            eq(transactionItems.transactionId, transactions.id),
+          )
           .where(
             and(
-              between(transactionItems.createdAt, timeRange.start, timeRange.end),
+              between(
+                transactionItems.createdAt,
+                timeRange.start,
+                timeRange.end,
+              ),
               eq(transactions.status, "COMPLETED"),
               eq(products.isDeleted, false),
             ),
@@ -95,7 +121,9 @@ const app = new Hono<HonoEnv>().get(
         db
           .select({
             totalExpenses: sql<string>`COALESCE(SUM(${expenses.amount}), 0)::text`,
-            expenseCount: sql<number>`COUNT(${expenses.id})::int`.mapWith(Number),
+            expenseCount: sql<number>`COUNT(${expenses.id})::int`.mapWith(
+              Number,
+            ),
           })
           .from(expenses)
           .where(between(expenses.createdAt, timeRange.start, timeRange.end)),
@@ -150,7 +178,10 @@ const app = new Hono<HonoEnv>().get(
             method: pm.paymentMethod,
             total: pm.total,
             count: pm.count,
-            percentage: revenue > 0 ? ((parseFloat(pm.total) / revenue) * 100).toFixed(2) : "0",
+            percentage:
+              revenue > 0
+                ? ((parseFloat(pm.total) / revenue) * 100).toFixed(2)
+                : "0",
           })),
         },
         expenses: {

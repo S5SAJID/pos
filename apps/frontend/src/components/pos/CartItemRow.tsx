@@ -56,4 +56,3 @@ export function CartItemRow({ item }: CartItemRowProps) {
     </HStack>
   )
 }
-

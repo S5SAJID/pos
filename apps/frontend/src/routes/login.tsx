@@ -128,22 +128,12 @@ function LoginPage() {
               />
             </VStack>
 
-            <Button
-              label="Sign in"
-              variant="primary"
-              size="lg"
-              type="submit"
-              isLoading={isSubmitting}
-            />
+            <Button label="Sign in" variant="primary" size="lg" type="submit" isLoading={isSubmitting} />
 
             <VStack hAlign="center">
               <Text type="supporting" color="secondary">
                 Don&apos;t have an account?{' '}
-                <Link
-                  href="mailto:s5sajidyt@gmail.com"
-                  target="_blank"
-                  type="supporting"
-                >
+                <Link href="mailto:s5sajidyt@gmail.com" target="_blank" type="supporting">
                   Request access
                 </Link>
               </Text>

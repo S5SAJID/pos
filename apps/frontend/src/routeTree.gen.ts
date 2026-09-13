@@ -80,8 +80,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    '/' | '/login' | '/expenses' | '/inventory' | '/orders' | '/products'
+  fullPaths: '/' | '/login' | '/expenses' | '/inventory' | '/orders' | '/products'
   fileRoutesByTo: FileRoutesByTo
   to: '/login' | '/expenses' | '/inventory' | '/orders' | '/products' | '/'
   id:
@@ -176,6 +175,4 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
 }
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()
