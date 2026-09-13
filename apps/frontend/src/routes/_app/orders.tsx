@@ -7,14 +7,7 @@ import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Grid } from '@astryxdesign/core/Grid'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Icon } from '@astryxdesign/core/Icon'
-import {
-  Card,
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutFooter,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Card, HStack, Layout, LayoutContent, LayoutFooter, VStack } from '@astryxdesign/core/Layout'
 import { Selector } from '@astryxdesign/core/Selector'
 import { Spinner } from '@astryxdesign/core/Spinner'
 import { StatusDot } from '@astryxdesign/core/StatusDot'
@@ -100,9 +93,7 @@ function RouteComponent() {
   const [page, setPage] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState('ALL')
   const [orderStatus, setOrderStatus] = useState('ALL')
-  const [selectedOrder, setSelectedOrder] = useState<RespTransaction | null>(
-    null,
-  )
+  const [selectedOrder, setSelectedOrder] = useState<RespTransaction | null>(null)
   const { sortConfig } = useTableSortableState<RespTransaction>({
     data: [],
   })
@@ -117,8 +108,7 @@ function RouteComponent() {
           limit: PAGE_SIZE.toString(),
           ...(sortConfig.sort[0] && {
             'orderBy[0][field]': sortConfig.sort[0].sortKey,
-            'orderBy[0][direction]':
-              sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
+            'orderBy[0][direction]': sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
           }),
           ...(paymentMethod !== 'ALL' && {
             'filters[paymentMethod]': paymentMethod,
@@ -150,9 +140,7 @@ function RouteComponent() {
     return map
   }, [productsData])
 
-  const { data: rawOrderItems, isLoading: isLoadingOrderItems } = useQuery<
-    RespTransactionItem[]
-  >({
+  const { data: rawOrderItems, isLoading: isLoadingOrderItems } = useQuery<RespTransactionItem[]>({
     queryKey: ['transaction-items', selectedOrder?.id],
     queryFn: async () => {
       if (!selectedOrder?.id) return []
@@ -193,9 +181,7 @@ function RouteComponent() {
       key: 'id',
       header: 'Order ID',
       width: proportional(1.5),
-      renderCell: (item) => (
-        <Text weight="medium">{item.id.slice(0, 8)}...</Text>
-      ),
+      renderCell: (item) => <Text weight="medium">{item.id.slice(0, 8)}...</Text>,
     },
     {
       key: 'createdAt',
@@ -238,12 +224,7 @@ function RouteComponent() {
       align: 'end',
       width: proportional(1),
       renderCell: (item) => (
-        <Button
-          label="View items"
-          variant="secondary"
-          size="sm"
-          onClick={() => setSelectedOrder(item)}
-        />
+        <Button label="View items" variant="secondary" size="sm" onClick={() => setSelectedOrder(item)} />
       ),
     },
   ]
@@ -358,25 +339,18 @@ function RouteComponent() {
               {selectedOrder && (
                 <VStack gap={8}>
                   <Card padding={3}>
-                    <Grid
-                      columns={{ minWidth: 120, repeat: 'fill', max: 4 }}
-                      gap={3}
-                    >
+                    <Grid columns={{ minWidth: 120, repeat: 'fill', max: 4 }} gap={3}>
                       <VStack gap={0.5}>
                         <Text type="supporting" color="secondary">
                           Date & Time
                         </Text>
-                        <Text weight="medium">
-                          {new Date(selectedOrder.createdAt).toLocaleString()}
-                        </Text>
+                        <Text weight="medium">{new Date(selectedOrder.createdAt).toLocaleString()}</Text>
                       </VStack>
                       <VStack gap={0.5}>
                         <Text type="supporting" color="secondary">
                           Payment
                         </Text>
-                        <PaymentMethodToken
-                          method={selectedOrder.paymentMethod}
-                        />
+                        <PaymentMethodToken method={selectedOrder.paymentMethod} />
                       </VStack>
                       <VStack gap={0.5}>
                         <Text type="supporting" color="secondary">
@@ -388,9 +362,7 @@ function RouteComponent() {
                         <Text type="supporting" color="secondary">
                           Gross Profit
                         </Text>
-                        <Text weight="medium">
-                          Rs. {parseFloat(selectedOrder.grossProfit).toFixed(2)}
-                        </Text>
+                        <Text weight="medium">Rs. {parseFloat(selectedOrder.grossProfit).toFixed(2)}</Text>
                       </VStack>
                     </Grid>
                   </Card>
@@ -402,15 +374,9 @@ function RouteComponent() {
                         <Spinner label="Loading items..." />
                       </Center>
                     ) : enrichedOrderItems.length > 0 ? (
-                      <Table
-                        data={enrichedOrderItems}
-                        columns={orderItemColumns}
-                        idKey="id"
-                      />
+                      <Table data={enrichedOrderItems} columns={orderItemColumns} idKey="id" />
                     ) : (
-                      <Text type="supporting">
-                        No line items found for this order.
-                      </Text>
+                      <Text type="supporting">No line items found for this order.</Text>
                     )}
                   </VStack>
                 </VStack>
@@ -423,9 +389,7 @@ function RouteComponent() {
                 {selectedOrder && (
                   <>
                     <Text weight="bold">Total Amount</Text>
-                    <Heading level={3}>
-                      Rs. {parseFloat(selectedOrder.totalAmount).toFixed(2)}
-                    </Heading>
+                    <Heading level={3}>Rs. {parseFloat(selectedOrder.totalAmount).toFixed(2)}</Heading>
                   </>
                 )}
               </HStack>
@@ -438,10 +402,7 @@ function RouteComponent() {
 }
 
 function PaymentMethodToken({ method }: { method: PaymentMethod }) {
-  const methodConfig: Record<
-    PaymentMethod,
-    { color: 'green' | 'blue' | 'teal'; label: string }
-  > = {
+  const methodConfig: Record<PaymentMethod, { color: 'green' | 'blue' | 'teal'; label: string }> = {
     CASH: { color: 'green', label: 'Cash' },
     CARD: { color: 'blue', label: 'Card' },
     EASYPAISA: { color: 'teal', label: 'Easypaisa' },
@@ -452,10 +413,7 @@ function PaymentMethodToken({ method }: { method: PaymentMethod }) {
 }
 
 function OrderStatusCell({ status }: { status: string }) {
-  const statusConfig: Record<
-    string,
-    { variant: 'success' | 'warning' | 'error' | 'neutral'; label: string }
-  > = {
+  const statusConfig: Record<string, { variant: 'success' | 'warning' | 'error' | 'neutral'; label: string }> = {
     COMPLETED: { variant: 'success', label: 'Completed' },
     PENDING: { variant: 'warning', label: 'Pending' },
     FAILED: { variant: 'error', label: 'Failed' },

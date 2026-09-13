@@ -41,18 +41,20 @@ MCP SERVER (xds):
 <!-- ASTRYX:END -->
 
 <!-- PROJECT DETAILS STARTS -->
+
 This project is placed in a Bun workspace at `/apps/frontend`. It serves as the frontend client for the POS software and directly integrates with the backend.
 
-* Frontend (`/apps/frontend`):
-    * Core Framework & Build: React 19, Vite 8, TypeScript 6 (Path alias `#/*` -> `./src/*`)
-    * Routing & State: TanStack Router, TanStack Query v5 (with TanStack Devtools)
-    * UI & Styling: Astryx Design System (`@astryxdesign/core`, `theme-neutral`), StyleX (`@stylexjs/stylex`), Lucide React, `@fontsource-variable/figtree`
-    * Forms & Validation: React Hook Form, Zod 4, `@hookform/resolvers`
-    * Authentication: Better Auth (`better-auth`)
-    * Hono RPC
+- Frontend (`/apps/frontend`):
+  - Core Framework & Build: React 19, Vite 8, TypeScript 6 (Path alias `#/*` -> `./src/*`)
+  - Routing & State: TanStack Router, TanStack Query v5 (with TanStack Devtools)
+  - UI & Styling: Astryx Design System (`@astryxdesign/core`, `theme-neutral`), StyleX (`@stylexjs/stylex`), Lucide React, `@fontsource-variable/figtree`
+  - Forms & Validation: React Hook Form, Zod 4, `@hookform/resolvers`
+  - Authentication: Better Auth (`better-auth`)
+  - Hono RPC
 
-* Backend (`/apps/backend`):
-    * Runtime & Server: Bun, Hono (v4.13.5)
-    * Database & ORM: Neon Serverless Postgres (`pg`), Drizzle ORM (v1.0.0-rc.4), `drizzle-zod`, `drizzle-crud`
-    * Auth & Validation: Better Auth (`better-auth@^1.7.xx`), Zod 4, `@hono/zod-validator`
+- Backend (`/apps/backend`):
+  - Runtime & Server: Bun, Hono (v4.13.5)
+  - Database & ORM: Neon Serverless Postgres (`pg`), Drizzle ORM (v1.0.0-rc.4), `drizzle-zod`, `drizzle-crud`
+  - Auth & Validation: Better Auth (`better-auth@^1.7.xx`), Zod 4, `@hono/zod-validator`
+
 <!-- PROJECT DETAILS ENDS -->

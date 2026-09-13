@@ -19,9 +19,10 @@ const app = new Hono<HonoEnv>()
       },
     });
 
-    
-    const orderBy = options.orderBy as any ?? [{ field: "createdAt", direction: "desc" }];
-    
+    const orderBy = (options.orderBy as any) ?? [
+      { field: "createdAt", direction: "desc" },
+    ];
+
     const results = await expenseCrud.list({
       ...options,
       page: Number(options.page) || 1,
@@ -29,16 +30,23 @@ const app = new Hono<HonoEnv>()
       orderBy: orderBy,
     });
 
-    return c.json({ ...results, pages: Math.ceil(results.total / results.limit) });
+    return c.json({
+      ...results,
+      pages: Math.ceil(results.total / results.limit),
+    });
   })
   .post("/", zValidator("json", expensesSchema), async (c) => {
     try {
       const { amount, category, description } = c.req.valid("json");
-      const [expense] = await db.insert(expenses).values({ amount, category, description }).returning({ id: expenses.id });
+      const [expense] = await db
+        .insert(expenses)
+        .values({ amount, category, description })
+        .returning({ id: expenses.id });
       if (!expense) throw Error("Failed to create expense");
       return c.json({ success: true, id: expense.id });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to create expense";
+      const message =
+        error instanceof Error ? error.message : "Failed to create expense";
       return c.json({ success: false, error: message }, 500);
     }
   });

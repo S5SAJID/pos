@@ -5,13 +5,7 @@ import { Button } from '@astryxdesign/core/Button'
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { FormLayout } from '@astryxdesign/core/FormLayout'
 import { InputGroup, InputGroupText } from '@astryxdesign/core/InputGroup'
-import {
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutFooter,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { HStack, Layout, LayoutContent, LayoutFooter, VStack } from '@astryxdesign/core/Layout'
 import { Link } from '@astryxdesign/core/Link'
 import { TextInput } from '@astryxdesign/core/TextInput'
 import { useToast } from '@astryxdesign/core/Toast'
@@ -21,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { formatPriceForApi } from '#/lib/utils'
 
 export type RespProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
   quantity: number
@@ -30,53 +25,30 @@ export type RespProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
 }
 
 export const productFormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Product name is required')
-    .max(255, 'Product name cannot exceed 255 characters'),
-  sku: z
-    .string()
-    .trim()
-    .max(255, 'SKU cannot exceed 255 characters')
-    .optional()
-    .or(z.literal('')),
+  name: z.string().trim().min(1, 'Product name is required').max(255, 'Product name cannot exceed 255 characters'),
+  sku: z.string().trim().max(255, 'SKU cannot exceed 255 characters').optional().or(z.literal('')),
   price: z
     .string()
     .trim()
     .min(1, 'Selling price is required')
-    .regex(
-      /^\d+(\.\d{1,2})?$/,
-      'Please enter a valid price (e.g. 150 or 150.00)',
-    )
+    .regex(/^\d+(\.\d{1,2})?$/, 'Please enter a valid price (e.g. 150 or 150.00)')
     .refine((v) => Number(v) >= 0, 'Selling price cannot be negative'),
   cost: z
     .string()
     .trim()
     .min(1, 'Cost price is required')
-    .regex(
-      /^\d+(\.\d{1,2})?$/,
-      'Please enter a valid cost (e.g. 100 or 100.00)',
-    )
+    .regex(/^\d+(\.\d{1,2})?$/, 'Please enter a valid cost (e.g. 100 or 100.00)')
     .refine((v) => Number(v) >= 0, 'Cost price cannot be negative'),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>
-
-function formatPriceForApi(val: string): string {
-  const num = parseFloat(val)
-  return isNaN(num) ? val : num.toFixed(2)
-}
 
 interface CreateProductModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function CreateProductModal({
-  isOpen,
-  onOpenChange,
-}: CreateProductModalProps) {
+export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalProps) {
   const queryClient = useQueryClient()
   const toast = useToast()
 
@@ -154,12 +126,7 @@ export function CreateProductModal({
   }
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      purpose="form"
-      width={460}
-    >
+    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={460}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Layout
           header={
@@ -184,11 +151,7 @@ export function CreateProductModal({
                         onChange={field.onChange}
                         isRequired
                         hasAutoFocus
-                        status={
-                          errors.name
-                            ? { type: 'error', message: errors.name.message }
-                            : undefined
-                        }
+                        status={errors.name ? { type: 'error', message: errors.name.message } : undefined}
                       />
                     )}
                   />
@@ -204,19 +167,12 @@ export function CreateProductModal({
                         onChange={field.onChange}
                         labelTooltip="Unique barcode or identifier for quick scanning"
                         isOptional
-                        status={
-                          errors.sku
-                            ? { type: 'error', message: errors.sku.message }
-                            : undefined
-                        }
+                        status={errors.sku ? { type: 'error', message: errors.sku.message } : undefined}
                       />
                     )}
                   />
 
-                  <FormLayout
-                    direction="horizontal"
-                    defaultOptionality="required"
-                  >
+                  <FormLayout direction="horizontal" defaultOptionality="required">
                     <Controller
                       name="price"
                       control={control}
@@ -224,11 +180,7 @@ export function CreateProductModal({
                         <InputGroup
                           label="Selling Price"
                           isRequired
-                          status={
-                            errors.price
-                              ? { type: 'error', message: errors.price.message }
-                              : undefined
-                          }
+                          status={errors.price ? { type: 'error', message: errors.price.message } : undefined}
                         >
                           <InputGroupText>Rs.</InputGroupText>
                           <TextInput
@@ -249,11 +201,7 @@ export function CreateProductModal({
                         <InputGroup
                           label="Cost Price"
                           isRequired
-                          status={
-                            errors.cost
-                              ? { type: 'error', message: errors.cost.message }
-                              : undefined
-                          }
+                          status={errors.cost ? { type: 'error', message: errors.cost.message } : undefined}
                         >
                           <InputGroupText>Rs.</InputGroupText>
                           <TextInput
@@ -283,12 +231,7 @@ export function CreateProductModal({
                   onClick={() => onOpenChange(false)}
                   isDisabled={createMutation.isPending}
                 />
-                <Button
-                  label="Create product"
-                  type="submit"
-                  variant="primary"
-                  isLoading={createMutation.isPending}
-                />
+                <Button label="Create product" type="submit" variant="primary" isLoading={createMutation.isPending} />
               </HStack>
             </LayoutFooter>
           }
@@ -304,11 +247,7 @@ interface EditProductModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function EditProductModal({
-  product,
-  isOpen,
-  onOpenChange,
-}: EditProductModalProps) {
+export function EditProductModal({ product, isOpen, onOpenChange }: EditProductModalProps) {
   const queryClient = useQueryClient()
   const toast = useToast()
 
@@ -387,12 +326,7 @@ export function EditProductModal({
   }
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      purpose="form"
-      width={460}
-    >
+    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={460}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Layout
           header={
@@ -416,11 +350,7 @@ export function EditProductModal({
                       onChange={field.onChange}
                       isRequired
                       hasAutoFocus
-                      status={
-                        errors.name
-                          ? { type: 'error', message: errors.name.message }
-                          : undefined
-                      }
+                      status={errors.name ? { type: 'error', message: errors.name.message } : undefined}
                     />
                   )}
                 />
@@ -435,12 +365,8 @@ export function EditProductModal({
                       value={field.value ?? ''}
                       onChange={field.onChange}
                       isOptional
-                      labelTooltip='Unique barcode or identifier for rapid scanning'
-                      status={
-                        errors.sku
-                          ? { type: 'error', message: errors.sku.message }
-                          : undefined
-                      }
+                      labelTooltip="Unique barcode or identifier for rapid scanning"
+                      status={errors.sku ? { type: 'error', message: errors.sku.message } : undefined}
                     />
                   )}
                 />
@@ -453,11 +379,7 @@ export function EditProductModal({
                       <InputGroup
                         label="Selling Price"
                         isRequired
-                        status={
-                          errors.price
-                            ? { type: 'error', message: errors.price.message }
-                            : undefined
-                        }
+                        status={errors.price ? { type: 'error', message: errors.price.message } : undefined}
                       >
                         <InputGroupText>Rs.</InputGroupText>
                         <TextInput
@@ -478,11 +400,7 @@ export function EditProductModal({
                       <InputGroup
                         label="Cost Price"
                         isRequired
-                        status={
-                          errors.cost
-                            ? { type: 'error', message: errors.cost.message }
-                            : undefined
-                        }
+                        status={errors.cost ? { type: 'error', message: errors.cost.message } : undefined}
                       >
                         <InputGroupText>Rs.</InputGroupText>
                         <TextInput
@@ -508,12 +426,7 @@ export function EditProductModal({
                   onClick={() => onOpenChange(false)}
                   isDisabled={editMutation.isPending}
                 />
-                <Button
-                  label="Save changes"
-                  type="submit"
-                  variant="primary"
-                  isLoading={editMutation.isPending}
-                />
+                <Button label="Save changes" type="submit" variant="primary" isLoading={editMutation.isPending} />
               </HStack>
             </LayoutFooter>
           }
@@ -529,11 +442,7 @@ interface DeleteProductModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function DeleteProductModal({
-  product,
-  isOpen,
-  onOpenChange,
-}: DeleteProductModalProps) {
+export function DeleteProductModal({ product, isOpen, onOpenChange }: DeleteProductModalProps) {
   const queryClient = useQueryClient()
   const toast = useToast()
 

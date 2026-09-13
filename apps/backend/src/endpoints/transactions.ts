@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 import { db } from "../db";
-import { inventory, products, transactionItems, transactions } from "../db/schema";
+import {
+  inventory,
+  products,
+  transactionItems,
+  transactions,
+} from "../db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import type { HonoEnv } from "../middlewares/session-middleware";
@@ -21,7 +26,9 @@ const app = new Hono<HonoEnv>()
       },
     });
 
-    const orderBy = options.orderBy as any ?? [{ field: "createdAt", direction: "desc" }];
+    const orderBy = (options.orderBy as any) ?? [
+      { field: "createdAt", direction: "desc" },
+    ];
 
     const results = await transactionsCrud.list({
       ...options,
@@ -30,7 +37,10 @@ const app = new Hono<HonoEnv>()
       orderBy,
     });
 
-    return c.json({ ...results, pages: Math.ceil(results.total / results.limit) });
+    return c.json({
+      ...results,
+      pages: Math.ceil(results.total / results.limit),
+    });
   })
   .get(":id", async (c) => {
     const { id } = c.req.param();
@@ -47,7 +57,10 @@ const app = new Hono<HonoEnv>()
     // check if the user submits products with same id as two items
     const uniqueProdIds = new Set(items.map((i) => i.id));
     if (uniqueProdIds.size !== items.length) {
-      return c.json({ success: false, error: "Duplicate products in transaction" }, 400);
+      return c.json(
+        { success: false, error: "Duplicate products in transaction" },
+        400,
+      );
     }
 
     try {
@@ -65,7 +78,9 @@ const app = new Hono<HonoEnv>()
             ),
           );
 
-        const productsMap = new Map(selectedProducts.map((prod) => [prod.id, prod]));
+        const productsMap = new Map(
+          selectedProducts.map((prod) => [prod.id, prod]),
+        );
 
         for (const item of items) {
           if (!productsMap.has(item.id)) {
@@ -83,7 +98,9 @@ const app = new Hono<HonoEnv>()
             ),
           );
 
-        const inventoryMap = new Map(inventoryRecords.map((inv) => [inv.productId, inv]));
+        const inventoryMap = new Map(
+          inventoryRecords.map((inv) => [inv.productId, inv]),
+        );
 
         for (const item of items) {
           const inv = inventoryMap.get(item.id);
@@ -125,7 +142,8 @@ const app = new Hono<HonoEnv>()
         await Promise.all(
           items.map((item) => {
             const product = productsMap.get(item.id);
-            if (!product) throw Error("Product not found when inserting transaction items");
+            if (!product)
+              throw Error("Product not found when inserting transaction items");
             return tx.insert(transactionItems).values({
               productId: product.id,
               quantity: item.quantity,
@@ -139,7 +157,10 @@ const app = new Hono<HonoEnv>()
         await Promise.all(
           items.map((item) => {
             const inv = inventoryMap.get(item.id);
-            if (!inv) throw Error("Invertory record not found when inserting transaction items");
+            if (!inv)
+              throw Error(
+                "Invertory record not found when inserting transaction items",
+              );
             return tx
               .update(inventory)
               .set({ quantity: inv.quantity - item.quantity })

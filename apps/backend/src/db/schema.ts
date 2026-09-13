@@ -63,7 +63,11 @@ export const expenses = snakeCase.table("expenses", {
 });
 
 // Transactions
-export const paymentMethodEnum = pgEnum("payment_method", ["CASH", "CARD", "EASYPAISA"]);
+export const paymentMethodEnum = pgEnum("payment_method", [
+  "CASH",
+  "CARD",
+  "EASYPAISA",
+]);
 export const transactionStatusEnum = pgEnum("transaction_status", [
   "PENDING",
   "COMPLETED",

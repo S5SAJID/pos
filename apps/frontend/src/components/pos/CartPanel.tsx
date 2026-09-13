@@ -4,14 +4,7 @@ import { useCartItemCount, usePosActions } from '#/lib/pos-store.ts'
 import { Badge } from '@astryxdesign/core/Badge'
 import { Button } from '@astryxdesign/core/Button'
 import { Heading } from '@astryxdesign/core/Heading'
-import {
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutFooter,
-  LayoutHeader,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { HStack, Layout, LayoutContent, LayoutFooter, LayoutHeader, VStack } from '@astryxdesign/core/Layout'
 import { Text } from '@astryxdesign/core/Text'
 
 interface CartPanelProps {
@@ -39,14 +32,7 @@ export function CartPanel({ isConfirming, onConfirm }: CartPanelProps) {
                 {new Date().toLocaleDateString()}
               </Text>
             </VStack>
-            {itemCount > 0 && (
-              <Button
-                label="Clear"
-                variant="ghost"
-                size="sm"
-                onClick={clearCart}
-              />
-            )}
+            {itemCount > 0 && <Button label="Clear" variant="ghost" size="sm" onClick={clearCart} />}
           </HStack>
         </LayoutHeader>
       }

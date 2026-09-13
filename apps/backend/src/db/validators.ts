@@ -1,8 +1,15 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { expenses, inventory, paymentMethodEnum, products, transactions } from "./schema";
+import {
+  expenses,
+  inventory,
+  paymentMethodEnum,
+  products,
+} from "./schema";
 
-const priceSchema = z.string().regex(/^\d+(\.\d{2})?$/, "Invalid amount format");
+const priceSchema = z
+  .string()
+  .regex(/^\d+(\.\d{2})?$/, "Invalid amount format");
 
 export const productSchema = createInsertSchema(products, {
   price: priceSchema,
@@ -23,7 +30,12 @@ export const expensesSchema = createInsertSchema(expenses, {
   amount: priceSchema,
 });
 
-export const transactionStatusEnum = z.enum(["PENDING", "COMPLETED", "FAILED", "REFUNDED"]);
+export const transactionStatusEnum = z.enum([
+  "PENDING",
+  "COMPLETED",
+  "FAILED",
+  "REFUNDED",
+]);
 
 // export const transactionSchema = createInsertSchema(transactions, {
 //   status: transactionStatusEnum,
