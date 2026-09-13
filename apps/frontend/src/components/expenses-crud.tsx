@@ -4,13 +4,7 @@ import { Button } from '@astryxdesign/core/Button'
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { FormLayout } from '@astryxdesign/core/FormLayout'
 import { InputGroup, InputGroupText } from '@astryxdesign/core/InputGroup'
-import {
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutFooter,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { HStack, Layout, LayoutContent, LayoutFooter, VStack } from '@astryxdesign/core/Layout'
 import { Selector } from '@astryxdesign/core/Selector'
 import { Text } from '@astryxdesign/core/Text'
 import { TextArea } from '@astryxdesign/core/TextArea'
@@ -41,18 +35,7 @@ export const EXPENSE_CATEGORY_OPTIONS: {
 
 export const expenseFormSchema = z.object({
   category: z.enum(
-    [
-      'RENT',
-      'SUPPLY',
-      'UTILITIES',
-      'SALARIES',
-      'MARKETING',
-      'SOFTWARE',
-      'TRAVEL',
-      'INSURANCE',
-      'TAXES',
-      'OTHER',
-    ],
+    ['RENT', 'SUPPLY', 'UTILITIES', 'SALARIES', 'MARKETING', 'SOFTWARE', 'TRAVEL', 'INSURANCE', 'TAXES', 'OTHER'],
     {
       error: 'Please select an expense category',
     },
@@ -61,24 +44,15 @@ export const expenseFormSchema = z.object({
     .string()
     .trim()
     .min(1, 'Expense amount is required')
+    .regex(/^(\d+|\d{1,3}(,\d{3})+)(\.\d{1,2})?$/, 'Please enter a valid amount (e.g. 500 or 500.00)')
     .transform((v) => v.replace(/,/g, ''))
     .pipe(
       z
         .string()
-        .regex(
-          /^\d+(\.\d{1,2})?$/,
-          'Please enter a valid amount (e.g. 500 or 500.00)',
-        )
-        .refine(
-          (v) => Number(v) > 0,
-          'Expense amount must be greater than zero',
-        ),
+        .regex(/^\d+(\.\d{1,2})?$/, 'Please enter a valid amount (e.g. 500 or 500.00)')
+        .refine((v) => Number(v) > 0, 'Expense amount must be greater than zero'),
     ),
-  description: z
-    .string()
-    .trim()
-    .min(1, 'Description is required')
-    .max(500, 'Description cannot exceed 500 characters'),
+  description: z.string().trim().min(1, 'Description is required').max(500, 'Description cannot exceed 500 characters'),
 })
 
 export type ExpenseFormValues = z.infer<typeof expenseFormSchema>
@@ -88,10 +62,7 @@ type AddExpenseModalProps = {
   onOpenChange: (open: boolean) => void
 }
 
-export function AddExpenseModal({
-  isOpen,
-  onOpenChange,
-}: AddExpenseModalProps) {
+export function AddExpenseModal({ isOpen, onOpenChange }: AddExpenseModalProps) {
   const queryClient = useQueryClient()
   const toast = useToast()
 
@@ -161,12 +132,7 @@ export function AddExpenseModal({
   }
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      purpose="form"
-      width={480}
-    >
+    <Dialog isOpen={isOpen} onOpenChange={onOpenChange} purpose="form" width={480}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Layout
           header={
@@ -258,8 +224,7 @@ export function AddExpenseModal({
                   />
                 </FormLayout>
                 <Text type="supporting" color="secondary">
-                  Recorded expenses are automatically accounted in financial
-                  reports.
+                  Recorded expenses are automatically accounted in financial reports.
                 </Text>
               </VStack>
             </LayoutContent>
@@ -273,12 +238,7 @@ export function AddExpenseModal({
                   onClick={() => onOpenChange(false)}
                   isDisabled={createMutation.isPending}
                 />
-                <Button
-                  label="Record expense"
-                  type="submit"
-                  variant="primary"
-                  isLoading={createMutation.isPending}
-                />
+                <Button label="Record expense" type="submit" variant="primary" isLoading={createMutation.isPending} />
               </HStack>
             </LayoutFooter>
           }

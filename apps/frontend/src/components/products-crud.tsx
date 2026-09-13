@@ -32,13 +32,13 @@ export const productFormSchema = z.object({
     .trim()
     .min(1, 'Selling price is required')
     .regex(/^\d+(\.\d{1,2})?$/, 'Please enter a valid price (e.g. 150 or 150.00)')
-    .refine((v) => Number(v) >= 0, 'Selling price cannot be negative'),
+    .refine((v) => Number.isFinite(Number(v)) && Number(v) >= 0, 'Selling price cannot be negative'),
   cost: z
     .string()
     .trim()
     .min(1, 'Cost price is required')
     .regex(/^\d+(\.\d{1,2})?$/, 'Please enter a valid cost (e.g. 100 or 100.00)')
-    .refine((v) => Number(v) >= 0, 'Cost price cannot be negative'),
+    .refine((v) => Number.isFinite(Number(v)) && Number(v) >= 0, 'Cost price cannot be negative'),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>

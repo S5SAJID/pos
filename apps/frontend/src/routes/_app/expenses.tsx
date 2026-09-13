@@ -6,13 +6,7 @@ import { Button } from '@astryxdesign/core/Button'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Icon } from '@astryxdesign/core/Icon'
-import {
-  Card,
-  HStack,
-  Layout,
-  LayoutContent,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Card, HStack, Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Selector } from '@astryxdesign/core/Selector'
 import {
   proportional,
@@ -85,8 +79,7 @@ function RouteComponent() {
           limit: PAGE_SIZE.toString(),
           ...(sortConfig.sort[0] && {
             'orderBy[0][field]': sortConfig.sort[0].sortKey,
-            'orderBy[0][direction]':
-              sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
+            'orderBy[0][direction]': sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
           }),
           ...(category !== 'ALL' && {
             'filters[category]': category,
@@ -144,10 +137,7 @@ function RouteComponent() {
               <VStack gap={2}>
                 <HStack hAlign="between" vAlign="center">
                   <Heading level={2}>Expenses</Heading>
-                  <Button
-                    label="Add Expense"
-                    onClick={() => setIsAddExpenseOpen(true)}
-                  />
+                  <Button label="Add Expense" onClick={() => setIsAddExpenseOpen(true)} />
                 </HStack>
                 <Toolbar
                   label="Table filters"
@@ -214,13 +204,7 @@ function RouteComponent() {
                     title="No expenses found"
                     description="Record your first expense to start tracking store costs."
                     icon={<Icon icon={Wallet} />}
-                    actions={
-                      <Button
-                        label="Add Expense"
-                        variant="primary"
-                        onClick={() => setIsAddExpenseOpen(true)}
-                      />
-                    }
+                    actions={<Button label="Add Expense" variant="primary" onClick={() => setIsAddExpenseOpen(true)} />}
                   />
                 )}
               </VStack>
@@ -229,10 +213,7 @@ function RouteComponent() {
         }
       />
 
-      <AddExpenseModal
-        isOpen={isAddExpenseOpen}
-        onOpenChange={setIsAddExpenseOpen}
-      />
+      <AddExpenseModal isOpen={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} />
     </>
   )
 }
@@ -280,15 +261,8 @@ const expenseColumns: TableColumn<RespExpense>[] = [
   },
 ]
 
-export default function ExpenseTypePill({
-  expense,
-}: {
-  expense: ExpenseCategory
-}) {
-  const categoryConfig: Record<
-    ExpenseCategory,
-    { color: TokenColor; label: string }
-  > = {
+export default function ExpenseTypePill({ expense }: { expense: ExpenseCategory }) {
+  const categoryConfig: Record<ExpenseCategory, { color: TokenColor; label: string }> = {
     SALARIES: { color: 'gray', label: 'Salaries' },
     INSURANCE: { color: 'blue', label: 'Insurance' },
     SOFTWARE: { color: 'teal', label: 'Software' },

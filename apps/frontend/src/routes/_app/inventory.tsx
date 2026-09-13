@@ -1,12 +1,5 @@
-import {
-  AddInventoryModal,
-  UpdateInventoryModal,
-} from '#/components/inventory-crud.tsx'
-import {
-  computeStockStatus,
-  StockStatus,
-  type StockStatusType,
-} from '#/components/stock-status.tsx'
+import { AddInventoryModal, UpdateInventoryModal } from '#/components/inventory-crud.tsx'
+import { computeStockStatus, StockStatus, type StockStatusType } from '#/components/stock-status.tsx'
 import TableSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
 import { Button } from '@astryxdesign/core/Button'
@@ -14,13 +7,7 @@ import { DropdownMenu } from '@astryxdesign/core/DropdownMenu'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Icon } from '@astryxdesign/core/Icon'
-import {
-  Card,
-  HStack,
-  Layout,
-  LayoutContent,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Card, HStack, Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Selector } from '@astryxdesign/core/Selector'
 import {
   paginateData,
@@ -140,9 +127,7 @@ function RouteComponent() {
   }, [productsData, inventoryData])
 
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [preselectedProductId, setPreselectedProductId] = useState<
-    string | undefined
-  >(undefined)
+  const [preselectedProductId, setPreselectedProductId] = useState<string | undefined>(undefined)
   const [editingItem, setEditingItem] = useState<EnrichedInventory | null>(null)
 
   const inventoryColumns = useMemo<TableColumn<EnrichedInventory>[]>(
@@ -253,12 +238,9 @@ function RouteComponent() {
     const q = search.toLowerCase().trim()
     return enrichedData.filter((item) => {
       const matchesSearch =
-        !q ||
-        item.productName.toLowerCase().includes(q) ||
-        (item.sku && item.sku.toLowerCase().includes(q))
+        !q || item.productName.toLowerCase().includes(q) || (item.sku && item.sku.toLowerCase().includes(q))
 
-      const matchesStatus =
-        statusFilter === 'ALL' || item.stockStatus === statusFilter
+      const matchesStatus = statusFilter === 'ALL' || item.stockStatus === statusFilter
 
       return matchesSearch && matchesStatus
     })

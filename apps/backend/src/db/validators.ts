@@ -22,7 +22,7 @@ export const productSelectSchema = createSelectSchema(products, {
 });
 
 export const inventorySchema = createInsertSchema(inventory, {
-  quantity: z.number().int().positive(),
+  quantity: z.number().int().nonnegative(),
   minStockLevel: z.number().int().nonnegative(),
 });
 
