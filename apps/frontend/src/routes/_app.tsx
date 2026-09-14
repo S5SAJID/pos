@@ -4,22 +4,8 @@ import { authClient } from '#/lib/auth.ts'
 import { useThemeChanger } from '#/providers/theme.tsx'
 import { IconButton } from '@astryxdesign/core'
 import { AppShell } from '@astryxdesign/core/AppShell'
-import {
-  SideNav,
-  SideNavItem,
-  SideNavSection,
-} from '@astryxdesign/core/SideNav'
-import {
-  Boxes,
-  Monitor,
-  Moon,
-  Package,
-  ReceiptText,
-  ShoppingCart,
-  Sun,
-  Wallet,
-  type LucideIcon,
-} from 'lucide-react'
+import { SideNav, SideNavItem, SideNavSection } from '@astryxdesign/core/SideNav'
+import { Boxes, Monitor, Moon, Package, ReceiptText, ShoppingCart, Sun, Wallet, type LucideIcon } from 'lucide-react'
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: async ({ context }) => {

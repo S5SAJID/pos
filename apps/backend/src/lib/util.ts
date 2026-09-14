@@ -9,7 +9,10 @@ export function formatMoney(value: string | number) {
   return num.toFixed(2);
 }
 
-export function getDateRange(period: "today" | "weekly" | "monthly"): { start: Date; end: Date } {
+export function getDateRange(period: "today" | "weekly" | "monthly"): {
+  start: Date;
+  end: Date;
+} {
   const end = new Date();
   const start = new Date();
 

@@ -1,15 +1,7 @@
-import {
-  useCartItems,
-  useCartTotal,
-  usePaymentMethod,
-  usePosActions,
-} from '#/lib/pos-store.ts'
+import { useCartItems, useCartTotal, usePaymentMethod, usePosActions } from '#/lib/pos-store.ts'
 import type { PaymentMethod } from '@pos/backend'
 import { HStack, VStack } from '@astryxdesign/core/Layout'
-import {
-  SegmentedControl,
-  SegmentedControlItem,
-} from '@astryxdesign/core/SegmentedControl'
+import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl'
 import { Text } from '@astryxdesign/core/Text'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Button } from '@astryxdesign/core/Button'
@@ -41,7 +33,9 @@ export function CartSummary({ isConfirming, onConfirm }: CartSummaryProps) {
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </Text>
         <VStack gap={0} style={{ alignItems: 'flex-end' }}>
-          <Text type="supporting" color="secondary">Total</Text>
+          <Text type="supporting" color="secondary">
+            Total
+          </Text>
           <Heading level={3}>Rs. {total.toFixed(2)}</Heading>
         </VStack>
       </HStack>
@@ -69,4 +63,3 @@ export function CartSummary({ isConfirming, onConfirm }: CartSummaryProps) {
     </VStack>
   )
 }
-

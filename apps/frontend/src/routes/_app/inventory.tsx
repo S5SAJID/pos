@@ -1,20 +1,17 @@
-import { StockStatus, computeStockStatus, type StockStatusType } from '#/components/stock-status.tsx'
+import { AddInventoryModal, UpdateInventoryModal } from '#/components/inventory-crud.tsx'
+import { computeStockStatus, StockStatus, type StockStatusType } from '#/components/stock-status.tsx'
 import TableSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
 import { Button } from '@astryxdesign/core/Button'
+import { DropdownMenu } from '@astryxdesign/core/DropdownMenu'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Icon } from '@astryxdesign/core/Icon'
-import {
-  Card,
-  HStack,
-  Layout,
-  LayoutContent,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Card, HStack, Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Selector } from '@astryxdesign/core/Selector'
 import {
   paginateData,
+  pixel,
   proportional,
   Table,
   useTablePagination,
@@ -28,7 +25,7 @@ import { Toolbar } from '@astryxdesign/core/Toolbar'
 import type { Inventory, Product } from '@pos/backend'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Boxes, SearchIcon } from 'lucide-react'
+import { Boxes, MoreHorizontal, Pencil, Plus, SearchIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/_app/inventory')({
@@ -43,18 +40,21 @@ type RespInventory = Omit<Inventory, 'createdAt' | 'updatedAt'> & {
 type RespProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
   quantity: number
   minStockLevel: number
+  cost: string
   createdAt: string
   updatedAt: string
 }
 
-type EnrichedInventory = {
+export type EnrichedInventory = {
   id: string
+  inventoryId?: string
   productId: string
   productName: string
   sku: string
   quantity: number
   minStockLevel: number
   stockStatus: StockStatusType
+  cost: string
   createdAt: string
   updatedAt: string
 }
@@ -112,34 +112,141 @@ function RouteComponent() {
 
       return {
         id: inv?.id ?? product.id,
+        inventoryId: inv?.id,
         productId: product.id,
         productName: product.name,
         sku: product.sku ?? '—',
         quantity,
         minStockLevel,
         stockStatus,
+        cost: product.cost,
         createdAt: inv?.createdAt ?? product.createdAt,
         updatedAt: inv?.updatedAt ?? product.updatedAt,
       }
     })
   }, [productsData, inventoryData])
 
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [preselectedProductId, setPreselectedProductId] = useState<string | undefined>(undefined)
+  const [editingItem, setEditingItem] = useState<EnrichedInventory | null>(null)
+
+  const inventoryColumns = useMemo<TableColumn<EnrichedInventory>[]>(
+    () => [
+      {
+        key: 'productName',
+        header: 'Product Name',
+        sortable: true,
+        resizable: true,
+        width: proportional(2),
+      },
+      {
+        key: 'sku',
+        header: 'SKU',
+        sortable: true,
+        width: proportional(1),
+        renderCell: (item) => item.sku,
+      },
+      {
+        key: 'quantity',
+        header: 'In Stock',
+        align: 'end',
+        sortable: true,
+        width: proportional(1),
+        renderCell: (item) => (
+          <Text type="body" hasTabularNumbers>
+            {item.quantity}
+          </Text>
+        ),
+      },
+      {
+        key: 'minStockLevel',
+        header: 'Min Stock Level',
+        align: 'end',
+        sortable: true,
+        width: proportional(1),
+        renderCell: (item) => (
+          <Text type="body" color="secondary" hasTabularNumbers>
+            {item.minStockLevel}
+          </Text>
+        ),
+      },
+      {
+        key: 'stockStatus',
+        header: 'Status',
+        sortable: true,
+        width: proportional(1.5),
+        renderCell: (item) => <StockStatus status={item.stockStatus} />,
+      },
+      {
+        key: 'updatedAt',
+        header: 'Last Updated',
+        align: 'end',
+        sortable: true,
+        width: proportional(1.5),
+        renderCell: (item) => (
+          <Text type="body" color="secondary" hasTabularNumbers>
+            {item.updatedAt
+              ? new Date(item.updatedAt).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : '—'}
+          </Text>
+        ),
+      },
+      {
+        key: 'actions',
+        header: '',
+        align: 'end',
+        width: pixel(48),
+        renderCell: (item) => (
+          <DropdownMenu
+            hasChevron={false}
+            placement="below"
+            alignment="end"
+            button={{
+              label: `Actions for ${item.productName}`,
+              icon: <Icon icon={MoreHorizontal} size="sm" />,
+              variant: 'ghost',
+              size: 'sm',
+              isIconOnly: true,
+            }}
+            items={[
+              {
+                label: 'Restock product',
+                icon: <Icon icon={Plus} size="sm" />,
+                onClick: () => {
+                  setPreselectedProductId(item.productId)
+                  setIsAddOpen(true)
+                },
+              },
+              {
+                label: 'Update stock count',
+                icon: <Icon icon={Pencil} size="sm" />,
+                onClick: () => setEditingItem(item),
+              },
+            ]}
+          />
+        ),
+      },
+    ],
+    [],
+  )
+
   const filteredData = useMemo(() => {
     const q = search.toLowerCase().trim()
     return enrichedData.filter((item) => {
       const matchesSearch =
-        !q ||
-        item.productName.toLowerCase().includes(q) ||
-        (item.sku && item.sku.toLowerCase().includes(q))
+        !q || item.productName.toLowerCase().includes(q) || (item.sku && item.sku.toLowerCase().includes(q))
 
-      const matchesStatus =
-        statusFilter === 'ALL' || item.stockStatus === statusFilter
+      const matchesStatus = statusFilter === 'ALL' || item.stockStatus === statusFilter
 
       return matchesSearch && matchesStatus
     })
   }, [enrichedData, search, statusFilter])
 
-  const pageSize = 20
+  const pageSize = 15
   const plugin = useTablePagination<EnrichedInventory>({
     page,
     onPageChange: setPage,
@@ -185,142 +292,118 @@ function RouteComponent() {
   }
 
   return (
-    <Layout
-      height="fill"
-      defaultHasDividers
-      contentWidth={1200}
-      content={
-        <LayoutContent padding={6}>
-          <Card padding={4}>
-            <VStack gap={2}>
-              <HStack hAlign="between" vAlign="center">
-                <Heading level={2}>Inventory</Heading>
-                <Button label="Add inventory record" />
-              </HStack>
-              <Toolbar
-                label="Inventory filters"
-                size="sm"
-                dividers={['bottom', 'top']}
-                startContent={
-                  <HStack gap={2} vAlign="center">
-                    <TextInput
-                      label="Search inventory"
-                      isLabelHidden
-                      hasClear={true}
-                      placeholder="Search by product name or SKU..."
-                      value={search}
-                      onChange={handleSearchChange}
-                      startIcon={SearchIcon}
-                    />
-                    <Selector
-                      label="Stock Status"
-                      isLabelHidden
-                      placeholder="Status"
-                      options={STATUS_OPTIONS}
-                      value={statusFilter}
-                      onChange={handleStatusFilterChange}
-                      size="sm"
-                      width={160}
-                    />
-                  </HStack>
-                }
-              />
-              {isLoading ? (
-                <TableSkeleton columns={inventoryColumns} />
-              ) : !enrichedData || enrichedData.length === 0 ? (
-                <EmptyState
-                  title="No inventory records found"
-                  description="Add products to your catalog to track and manage stock."
-                  icon={<Icon icon={Boxes} />}
-                />
-              ) : filteredData.length === 0 ? (
-                <EmptyState
-                  title="No matching inventory"
-                  description={`No items matched your search${statusFilter !== 'ALL' ? ' and filter' : ''}. Try adjusting your filters.`}
-                  icon={<Icon icon={SearchIcon} />}
-                  actions={
-                    <Button
-                      label="Clear filters"
-                      variant="secondary"
-                      onClick={() => {
-                        setSearch('')
-                        setStatusFilter('ALL')
-                        setPage(1)
-                      }}
-                    />
+    <>
+      <Layout
+        height="fill"
+        defaultHasDividers
+        contentWidth={1200}
+        content={
+          <LayoutContent padding={6}>
+            <Card padding={4}>
+              <VStack gap={2}>
+                <HStack hAlign="between" vAlign="center">
+                  <Heading level={2}>Inventory</Heading>
+                  <Button
+                    label="Add inventory record"
+                    onClick={() => {
+                      setPreselectedProductId(undefined)
+                      setIsAddOpen(true)
+                    }}
+                  />
+                </HStack>
+                <Toolbar
+                  label="Inventory filters"
+                  size="sm"
+                  dividers={['bottom', 'top']}
+                  startContent={
+                    <HStack gap={2} vAlign="center">
+                      <TextInput
+                        label="Search inventory"
+                        isLabelHidden
+                        hasClear={true}
+                        placeholder="Search by product name or SKU..."
+                        value={search}
+                        onChange={handleSearchChange}
+                        startIcon={SearchIcon}
+                      />
+                      <Selector
+                        label="Stock Status"
+                        isLabelHidden
+                        placeholder="Status"
+                        options={STATUS_OPTIONS}
+                        value={statusFilter}
+                        onChange={handleStatusFilterChange}
+                        size="sm"
+                        width={160}
+                      />
+                    </HStack>
                   }
                 />
-              ) : (
-                <Table
-                  data={paginateData(sortedData, page, pageSize) ?? []}
-                  columns={inventoryColumns}
-                  idKey="id"
-                  isStriped
-                  hasHover
-                  plugins={{ pagination: plugin, sortable: sortablePlugin }}
-                />
-              )}
-            </VStack>
-          </Card>
-        </LayoutContent>
-      }
-    />
+                {isLoading ? (
+                  <TableSkeleton columns={inventoryColumns} />
+                ) : !enrichedData || enrichedData.length === 0 ? (
+                  <EmptyState
+                    title="No inventory records found"
+                    description="Add products to your catalog to track and manage stock."
+                    icon={<Icon icon={Boxes} />}
+                    actions={
+                      <Button
+                        label="Add inventory record"
+                        variant="primary"
+                        onClick={() => {
+                          setPreselectedProductId(undefined)
+                          setIsAddOpen(true)
+                        }}
+                      />
+                    }
+                  />
+                ) : filteredData.length === 0 ? (
+                  <EmptyState
+                    title="No matching inventory"
+                    description={`No items matched your search${statusFilter !== 'ALL' ? ' and filter' : ''}. Try adjusting your filters.`}
+                    icon={<Icon icon={SearchIcon} />}
+                    actions={
+                      <Button
+                        label="Clear filters"
+                        variant="secondary"
+                        onClick={() => {
+                          setSearch('')
+                          setStatusFilter('ALL')
+                          setPage(1)
+                        }}
+                      />
+                    }
+                  />
+                ) : (
+                  <Table
+                    data={paginateData(sortedData, page, pageSize) ?? []}
+                    columns={inventoryColumns}
+                    idKey="id"
+                    isStriped
+                    hasHover
+                    plugins={{ pagination: plugin, sortable: sortablePlugin }}
+                  />
+                )}
+              </VStack>
+            </Card>
+          </LayoutContent>
+        }
+      />
+
+      <AddInventoryModal
+        isOpen={isAddOpen}
+        onOpenChange={(open) => {
+          setIsAddOpen(open)
+          if (!open) setPreselectedProductId(undefined)
+        }}
+        preselectedProductId={preselectedProductId}
+      />
+
+      <UpdateInventoryModal
+        inventoryItem={editingItem}
+        isOpen={Boolean(editingItem)}
+        onOpenChange={(open) => !open && setEditingItem(null)}
+      />
+    </>
   )
 }
-
-const inventoryColumns: TableColumn<EnrichedInventory>[] = [
-  {
-    key: 'productName',
-    header: 'Product Name',
-    sortable: true,
-    resizable: true,
-    width: proportional(2),
-  },
-  {
-    key: 'sku',
-    header: 'SKU',
-    sortable: true,
-    width: proportional(1),
-    renderCell: (item) => item.sku,
-  },
-  {
-    key: 'quantity',
-    header: 'In Stock',
-    align: 'end',
-    sortable: true,
-    width: proportional(1),
-    renderCell: (item) => (
-      <Text type="body" hasTabularNumbers>
-        {item.quantity}
-      </Text>
-    ),
-  },
-  {
-    key: 'minStockLevel',
-    header: 'Min Stock Level',
-    align: 'end',
-    sortable: true,
-    width: proportional(1),
-    renderCell: (item) => (
-      <Text type="body" color="secondary" hasTabularNumbers>
-        {item.minStockLevel}
-      </Text>
-    ),
-  },
-  {
-    key: 'stockStatus',
-    header: 'Status',
-    sortable: true,
-    width: proportional(1.5),
-    renderCell: (item) => <StockStatus status={item.stockStatus} />,
-  },
-  {
-    key: 'updatedAt',
-    header: 'Last Updated',
-    align: 'end',
-    sortable: true,
-    width: proportional(1.5),
-    renderCell: (item) =>
-      item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '—',
-  },
-]

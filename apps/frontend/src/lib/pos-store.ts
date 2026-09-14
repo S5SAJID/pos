@@ -35,9 +35,7 @@ const usePosStore = create<PosState>()(
               if (existing) {
                 return {
                   items: state.items.map((i) =>
-                    i.productId === item.productId
-                      ? { ...i, quantity: Math.min(i.quantity + 1, i.maxQuantity) }
-                      : i,
+                    i.productId === item.productId ? { ...i, quantity: Math.min(i.quantity + 1, i.maxQuantity) } : i,
                   ),
                 }
               }
@@ -64,9 +62,7 @@ const usePosStore = create<PosState>()(
               }
               return {
                 items: state.items.map((i) =>
-                  i.productId === productId
-                    ? { ...i, quantity: Math.min(quantity, i.maxQuantity) }
-                    : i,
+                  i.productId === productId ? { ...i, quantity: Math.min(quantity, i.maxQuantity) } : i,
                 ),
               }
             },
@@ -76,8 +72,7 @@ const usePosStore = create<PosState>()(
 
         clearCart: () => set({ items: [] }, false, 'clearCart'),
 
-        setPaymentMethod: (method) =>
-          set({ paymentMethod: method }, false, 'setPaymentMethod'),
+        setPaymentMethod: (method) => set({ paymentMethod: method }, false, 'setPaymentMethod'),
       },
     }),
     { name: 'PosStore' },
@@ -90,13 +85,9 @@ export const usePaymentMethod = () => usePosStore((s) => s.paymentMethod)
 export const usePosActions = () => usePosStore((s) => s.actions)
 
 export const useCartTotal = () =>
-  usePosStore((s) =>
-    s.items.reduce((total, item) => total + item.price * item.quantity, 0),
-  )
+  usePosStore((s) => s.items.reduce((total, item) => total + item.price * item.quantity, 0))
 
-export const useCartItemCount = () =>
-  usePosStore((s) => s.items.reduce((count, item) => count + item.quantity, 0))
+export const useCartItemCount = () => usePosStore((s) => s.items.reduce((count, item) => count + item.quantity, 0))
 
 export const useIsProductInCart = (productId: string) =>
   usePosStore((s) => s.items.some((i) => i.productId === productId))
-

@@ -1,18 +1,12 @@
+import { AddExpenseModal } from '#/components/expenses-crud.tsx'
 import SkeletonTableRowSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
 import { useDebounce } from '#/lib/use-debounce'
-import { Badge, type BadgeVariant } from '@astryxdesign/core/Badge'
 import { Button } from '@astryxdesign/core/Button'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Icon } from '@astryxdesign/core/Icon'
-import {
-  Card,
-  HStack,
-  Layout,
-  LayoutContent,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Card, HStack, Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Selector } from '@astryxdesign/core/Selector'
 import {
   proportional,
@@ -22,7 +16,9 @@ import {
   useTableSortableState,
   type TableColumn,
 } from '@astryxdesign/core/Table'
+import { Text } from '@astryxdesign/core/Text'
 import { TextInput } from '@astryxdesign/core/TextInput'
+import { Token, type TokenColor } from '@astryxdesign/core/Token'
 import { Toolbar } from '@astryxdesign/core/Toolbar'
 import type { Expense, ExpenseCategory } from '@pos/backend'
 import { useQuery } from '@tanstack/react-query'
@@ -46,7 +42,7 @@ type ExpensesResponse = {
   pages: number
 }
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 15
 
 const CATEGORY_OPTIONS = [
   { value: 'ALL', label: 'All Categories' },
@@ -63,6 +59,7 @@ const CATEGORY_OPTIONS = [
 ]
 
 function RouteComponent() {
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('ALL')
@@ -82,16 +79,14 @@ function RouteComponent() {
           limit: PAGE_SIZE.toString(),
           ...(sortConfig.sort[0] && {
             'orderBy[0][field]': sortConfig.sort[0].sortKey,
-            'orderBy[0][direction]':
-              sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
+            'orderBy[0][direction]': sortConfig.sort[0].direction === 'ascending' ? 'asc' : 'desc',
           }),
           ...(category !== 'ALL' && {
             'filters[category]': category,
           }),
-          ...(searchDebounced !== '' &&
-            searchDebounced.length > 2 && {
-              search: searchDebounced.toLowerCase(),
-            }),
+          ...(searchDebounced.trim() !== '' && {
+            search: searchDebounced.trim().toLowerCase(),
+          }),
         },
       })
       return await data.json()
@@ -131,72 +126,95 @@ function RouteComponent() {
   }
 
   return (
-    <Layout
-      height="fill"
-      defaultHasDividers
-      contentWidth={1200}
-      content={
-        <LayoutContent padding={6}>
-          <Card padding={4}>
-            <VStack gap={2}>
-              <HStack hAlign="between" vAlign="center">
-                <Heading level={2}>Expenses</Heading>
-                <Button label="Add Expense" />
-              </HStack>
-              <Toolbar
-                label="Table filters"
-                size="sm"
-                dividers={['bottom', 'top']}
-                startContent={
-                  <HStack gap={2} vAlign="center">
-                    <TextInput
-                      label="Search"
-                      isLabelHidden
-                      placeholder="Search..."
-                      value={search}
-                      onChange={handleSearchChange}
-                      isLoading={isFetching}
-                      startIcon={SearchIcon}
-                    />
-                    <Selector
-                      label="Category"
-                      isLabelHidden
-                      placeholder="Category"
-                      options={CATEGORY_OPTIONS}
-                      value={category}
-                      onChange={(val) => {
-                        setCategory(val || 'ALL')
-                        setPage(1)
-                      }}
-                      size="sm"
-                      width={170}
-                    />
-                  </HStack>
-                }
-              />
-              {isLoading ? (
-                <SkeletonTableRowSkeleton columns={expenseColumns} />
-              ) : data && data.results && data.results.length > 0 ? (
-                <Table
-                  data={data.results}
-                  columns={expenseColumns}
-                  idKey="id"
-                  isStriped
-                  hasHover
-                  plugins={{ pagination: plugin, sortable: sortablePlugin }}
+    <>
+      <Layout
+        height="fill"
+        defaultHasDividers
+        contentWidth={1200}
+        content={
+          <LayoutContent padding={6}>
+            <Card padding={4}>
+              <VStack gap={2}>
+                <HStack hAlign="between" vAlign="center">
+                  <Heading level={2}>Expenses</Heading>
+                  <Button label="Add Expense" onClick={() => setIsAddExpenseOpen(true)} />
+                </HStack>
+                <Toolbar
+                  label="Table filters"
+                  size="sm"
+                  dividers={['bottom', 'top']}
+                  startContent={
+                    <HStack gap={2} vAlign="center">
+                      <TextInput
+                        label="Search"
+                        isLabelHidden
+                        hasClear={true}
+                        placeholder="Search..."
+                        value={search}
+                        onChange={handleSearchChange}
+                        isLoading={isFetching}
+                        startIcon={SearchIcon}
+                      />
+                      <Selector
+                        label="Category"
+                        isLabelHidden
+                        placeholder="Category"
+                        options={CATEGORY_OPTIONS}
+                        value={category}
+                        onChange={(val) => {
+                          setCategory(val || 'ALL')
+                          setPage(1)
+                        }}
+                        size="sm"
+                        width={170}
+                      />
+                    </HStack>
+                  }
                 />
-              ) : (
-                <EmptyState
-                  title="No expenses found"
-                  description="Add expenses data first."
-                  icon={<Icon icon={Wallet} />}
-                />
-              )}
-            </VStack>
-          </Card>
-        </LayoutContent>
-      }
-    />
+                {isLoading ? (
+                  <SkeletonTableRowSkeleton columns={expenseColumns} />
+                ) : data && data.results && data.results.length > 0 ? (
+                  <Table
+                    data={data.results}
+                    columns={expenseColumns}
+                    idKey="id"
+                    isStriped
+                    hasHover
+                    plugins={{ pagination: plugin, sortable: sortablePlugin }}
+                  />
+                ) : search.trim() !== '' || category !== 'ALL' ? (
+                  <EmptyState
+                    title="No matching expenses"
+                    description={`No expense records matched your search${category !== 'ALL' ? ' and category filter' : ''}. Try adjusting your filters.`}
+                    icon={<Icon icon={SearchIcon} />}
+                    actions={
+                      <Button
+                        label="Clear filters"
+                        variant="secondary"
+                        onClick={() => {
+                          setSearch('')
+                          setCategory('ALL')
+                          setPage(1)
+                        }}
+                      />
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    title="No expenses found"
+                    description="Record your first expense to start tracking store costs."
+                    icon={<Icon icon={Wallet} />}
+                    actions={<Button label="Add Expense" variant="primary" onClick={() => setIsAddExpenseOpen(true)} />}
+                  />
+                )}
+              </VStack>
+            </Card>
+          </LayoutContent>
+        }
+      />
+
+      <AddExpenseModal isOpen={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} />
+    </>
   )
 }
 
@@ -219,7 +237,11 @@ const expenseColumns: TableColumn<RespExpense>[] = [
     align: 'end',
     sortable: true,
     width: proportional(1),
-    renderCell: (item) => `Rs. ${parseFloat(item.amount).toFixed(2)}`,
+    renderCell: (item) => (
+      <Text type="body" hasTabularNumbers>
+        {`Rs. ${parseFloat(item.amount).toFixed(2)}`}
+      </Text>
+    ),
   },
   {
     key: 'createdAt',
@@ -227,32 +249,36 @@ const expenseColumns: TableColumn<RespExpense>[] = [
     sortable: true,
     align: 'end',
     width: proportional(1.5),
-    renderCell: (item) => new Date(item.createdAt).toLocaleDateString(),
+    renderCell: (item) => (
+      <Text type="body" color="secondary" hasTabularNumbers>
+        {new Date(item.createdAt).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })}
+      </Text>
+    ),
   },
 ]
 
-export default function ExpenseTypePill({
-  expense,
-}: {
-  expense: ExpenseCategory
-}) {
-  const categoryConfig: Record<
-    ExpenseCategory,
-    { variant: BadgeVariant; label: string }
-  > = {
-    SALARIES: { variant: 'gray', label: 'Salaries' }, // Green: Wealth, prosperity, and financial livelihood
-    INSURANCE: { variant: 'blue', label: 'Insurance' }, // Blue: Trust, safety, security, and peace of mind
-    SOFTWARE: { variant: 'teal', label: 'Software' }, // Teal: Innovation, digital logic, and modern tech
-    MARKETING: { variant: 'pink', label: 'Marketing' }, // Pink: Excitement, creative energy, and expression
-    TAXES: { variant: 'orange', label: 'Taxes' }, // Orange: Focus, strict calculation, and high alertness
-    RENT: { variant: 'purple', label: 'Rent' }, // Purple: Fixed obligations, luxury space, and structure
-    TRAVEL: { variant: 'cyan', label: 'Travel' }, // Cyan: Open horizons, movement, freedom, and sky
-    UTILITIES: { variant: 'yellow', label: 'Utilities' }, // Blue: Infrastructure connection (water, power grids)
-    SUPPLY: { variant: 'green', label: 'Supply' }, // Green: Tangible assets, resources, and raw materials
-    OTHER: { variant: 'cyan', label: 'Other' }, // Cyan: Low visual dominance, neutral backdrop baseline
+export default function ExpenseTypePill({ expense }: { expense: ExpenseCategory }) {
+  const categoryConfig: Record<ExpenseCategory, { color: TokenColor; label: string }> = {
+    SALARIES: { color: 'gray', label: 'Salaries' },
+    INSURANCE: { color: 'blue', label: 'Insurance' },
+    SOFTWARE: { color: 'teal', label: 'Software' },
+    MARKETING: { color: 'pink', label: 'Marketing' },
+    TAXES: { color: 'orange', label: 'Taxes' },
+    RENT: { color: 'purple', label: 'Rent' },
+    TRAVEL: { color: 'cyan', label: 'Travel' },
+    UTILITIES: { color: 'yellow', label: 'Utilities' },
+    SUPPLY: { color: 'green', label: 'Supply' },
+    OTHER: { color: 'default', label: 'Other' },
   }
 
-  const { variant, label } = categoryConfig[expense]
+  const { color, label } = categoryConfig[expense] ?? {
+    color: 'default',
+    label: expense,
+  }
 
-  return <Badge variant={variant} label={label} />
+  return <Token size="sm" color={color} label={label} />
 }

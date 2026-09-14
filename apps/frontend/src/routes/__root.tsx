@@ -1,8 +1,4 @@
-import {
-  Link,
-  Outlet,
-  createRootRouteWithContext,
-} from '@tanstack/react-router'
+import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'

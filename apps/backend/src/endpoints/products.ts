@@ -11,12 +11,16 @@ const app = new Hono<HonoEnv>()
     const results = await db
       .select({
         ...getColumns(products),
-        quantity: sql<number>`coalesce(${inventory.quantity}, 0)`.mapWith(Number),
-        minStockLevel: sql<number>`coalesce(${inventory.minStockLevel}, 0)`.mapWith(Number),
+        quantity: sql<number>`coalesce(${inventory.quantity}, 0)`.mapWith(
+          Number,
+        ),
+        minStockLevel:
+          sql<number>`coalesce(${inventory.minStockLevel}, 0)`.mapWith(Number),
       })
       .from(products)
       .leftJoin(inventory, eq(products.id, inventory.productId))
-      .where(eq(products.isDeleted, false)).orderBy(desc(products.createdAt));
+      .where(eq(products.isDeleted, false))
+      .orderBy(desc(products.createdAt));
     return c.json(results);
   })
   .post("/", zValidator("json", productSchema), async (c) => {
@@ -26,7 +30,11 @@ const app = new Hono<HonoEnv>()
   })
   .put("/", zValidator("json", productSelectSchema), async (c) => {
     const data = c.req.valid("json");
-    const result = await db.update(products).set(data).where(eq(products.id, data.id)).returning({ id: products.id });
+    const result = await db
+      .update(products)
+      .set(data)
+      .where(eq(products.id, data.id))
+      .returning({ id: products.id });
     if (result[0]) {
       return c.json({ success: true });
     } else {
@@ -35,7 +43,11 @@ const app = new Hono<HonoEnv>()
   })
   .delete("/:id", async (c) => {
     const { id } = c.req.param();
-    const result = await db.update(products).set({ isDeleted: true }).where(eq(products.id, id)).returning({ id: products.id });
+    const result = await db
+      .update(products)
+      .set({ isDeleted: true })
+      .where(eq(products.id, id))
+      .returning({ id: products.id });
     if (!result[0]) {
       return c.json({ success: false, error: "Product not found" }, 404);
     }

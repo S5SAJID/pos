@@ -11,4 +11,3 @@ export const shopConfig = {
 } as const
 
 export type ShopConfig = typeof shopConfig
-

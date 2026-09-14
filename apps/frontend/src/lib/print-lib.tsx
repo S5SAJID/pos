@@ -94,8 +94,14 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
         <div key={i} className="row">
           <span className="col-name">{item.name}</span>
           <span className="col-qty">{item.quantity}</span>
-          <span className="col-price">{currency}{item.unitPrice.toFixed(2)}</span>
-          <span className="col-sub">{currency}{(item.unitPrice * item.quantity).toFixed(2)}</span>
+          <span className="col-price">
+            {currency}
+            {item.unitPrice.toFixed(2)}
+          </span>
+          <span className="col-sub">
+            {currency}
+            {(item.unitPrice * item.quantity).toFixed(2)}
+          </span>
         </div>
       ))}
 
@@ -103,7 +109,10 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
 
       <div className="row bold">
         <span>TOTAL</span>
-        <span className='medium'>{currency}{total.toFixed(2)}</span>
+        <span className="medium">
+          {currency}
+          {total.toFixed(2)}
+        </span>
       </div>
       <div className="row">
         <span>Payment</span>

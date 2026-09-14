@@ -1,5 +1,11 @@
 import { defineRelations } from "drizzle-orm";
-import { inventory, products, transactionItems, transactions, expenses } from "./schema";
+import {
+  inventory,
+  products,
+  transactionItems,
+  transactions,
+  expenses,
+} from "./schema";
 import { users } from "./auth.schema";
 
 export const relations = defineRelations(

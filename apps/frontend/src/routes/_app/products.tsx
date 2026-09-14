@@ -12,13 +12,7 @@ import { DropdownMenu } from '@astryxdesign/core/DropdownMenu'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Icon } from '@astryxdesign/core/Icon'
-import {
-  Card,
-  HStack,
-  Layout,
-  LayoutContent,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Card, HStack, Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import {
   paginateData,
   pixel,
@@ -34,13 +28,7 @@ import { TextInput } from '@astryxdesign/core/TextInput'
 import { Toolbar } from '@astryxdesign/core/Toolbar'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  MoreHorizontal,
-  Pencil,
-  SearchIcon,
-  ShoppingBag,
-  Trash2,
-} from 'lucide-react'
+import { MoreHorizontal, Pencil, SearchIcon, ShoppingBag, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/_app/products')({
@@ -50,9 +38,7 @@ export const Route = createFileRoute('/_app/products')({
 function RouteComponent() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<RespProduct | null>(null)
-  const [deletingProduct, setDeletingProduct] = useState<RespProduct | null>(
-    null,
-  )
+  const [deletingProduct, setDeletingProduct] = useState<RespProduct | null>(null)
 
   const { data, isLoading, isError } = useQuery<RespProduct[]>({
     queryKey: ['products'],
@@ -113,12 +99,7 @@ function RouteComponent() {
         sortable: true,
         width: proportional(1),
         renderCell: (item) => (
-          <StockStatus
-            hAlign="end"
-            minStockLevel={item.minStockLevel}
-            quantity={item.quantity}
-            showQuantity
-          />
+          <StockStatus hAlign="end" minStockLevel={item.minStockLevel} quantity={item.quantity} showQuantity />
         ),
       },
       {
@@ -184,8 +165,7 @@ function RouteComponent() {
 
   const filteredData = (data ?? []).filter(
     (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.sku?.toLowerCase().includes(search.toLowerCase()),
+      item.name.toLowerCase().includes(search.toLowerCase()) || item.sku?.toLowerCase().includes(search.toLowerCase()),
   )
 
   const { sortedData, sortConfig } = useTableSortableState<RespProduct>({
@@ -231,10 +211,7 @@ function RouteComponent() {
               <VStack gap={2}>
                 <HStack hAlign="between" vAlign="center">
                   <Heading level={2}>Products</Heading>
-                  <Button
-                    label="Create product"
-                    onClick={() => setIsCreateOpen(true)}
-                  />
+                  <Button label="Create product" onClick={() => setIsCreateOpen(true)} />
                 </HStack>
                 <Toolbar
                   label="Table filters"
@@ -259,13 +236,7 @@ function RouteComponent() {
                     title="No products yet"
                     description="Create your first product to start managing your catalog."
                     icon={<Icon icon={ShoppingBag} />}
-                    actions={
-                      <Button
-                        label="Create product"
-                        variant="primary"
-                        onClick={() => setIsCreateOpen(true)}
-                      />
-                    }
+                    actions={<Button label="Create product" variant="primary" onClick={() => setIsCreateOpen(true)} />}
                   />
                 ) : filteredData.length === 0 ? (
                   <EmptyState
@@ -299,10 +270,7 @@ function RouteComponent() {
         }
       />
 
-      <CreateProductModal
-        isOpen={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-      />
+      <CreateProductModal isOpen={isCreateOpen} onOpenChange={setIsCreateOpen} />
 
       <EditProductModal
         product={editingProduct}

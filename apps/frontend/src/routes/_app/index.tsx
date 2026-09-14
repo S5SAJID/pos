@@ -2,11 +2,7 @@ import { CartPanel } from '#/components/pos/CartPanel.tsx'
 import { ProductGrid } from '#/components/pos/ProductGrid.tsx'
 import type { RespProduct } from '#/components/products-crud.tsx'
 import { backendClient } from '#/lib/backend.ts'
-import {
-  useCartItems,
-  usePaymentMethod,
-  usePosActions,
-} from '#/lib/pos-store.ts'
+import { useCartItems, usePaymentMethod, usePosActions } from '#/lib/pos-store.ts'
 import { printReciept } from '#/lib/print-lib.tsx'
 import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
 import { useToast } from '@astryxdesign/core/Toast'
@@ -56,10 +52,7 @@ function RouteComponent() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
 
-      const orderId =
-        'transactionId' in data && typeof data.transactionId === 'string'
-          ? data.transactionId
-          : 'unknown'
+      const orderId = 'transactionId' in data && typeof data.transactionId === 'string' ? data.transactionId : 'unknown'
 
       printReciept({
         orderId,
@@ -102,10 +95,7 @@ function RouteComponent() {
       }
       end={
         <LayoutPanel width={380} hasDivider padding={0}>
-          <CartPanel
-            isConfirming={confirmMutation.isPending}
-            onConfirm={() => confirmMutation.mutate()}
-          />
+          <CartPanel isConfirming={confirmMutation.isPending} onConfirm={() => confirmMutation.mutate()} />
         </LayoutPanel>
       }
     />

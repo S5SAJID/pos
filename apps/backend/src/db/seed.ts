@@ -29,43 +29,133 @@ export async function seedDatabase() {
       .insert(schema.products)
       .values([
         // Beverages & Tea (20-25% margin)
-        { name: "Tapal Danedar 950g", sku: "TAP-950", price: "1450.00", cost: "1200.00" },
-        { name: "Lipton Yellow 950g", sku: "LIP-950", price: "1380.00", cost: "1150.00" },
-        { name: "Olpers Milk 1L", sku: "OLP-1L", price: "290.00", cost: "250.00" },
-        { name: "Nestle Milk 1L", sku: "NES-1L", price: "280.00", cost: "245.00" },
+        {
+          name: "Tapal Danedar 950g",
+          sku: "TAP-950",
+          price: "1450.00",
+          cost: "1200.00",
+        },
+        {
+          name: "Lipton Yellow 950g",
+          sku: "LIP-950",
+          price: "1380.00",
+          cost: "1150.00",
+        },
+        {
+          name: "Olpers Milk 1L",
+          sku: "OLP-1L",
+          price: "290.00",
+          cost: "250.00",
+        },
+        {
+          name: "Nestle Milk 1L",
+          sku: "NES-1L",
+          price: "280.00",
+          cost: "245.00",
+        },
 
         // Spices & Masalas (25-30% margin)
-        { name: "Shan Biryani 50g", sku: "SHN-BIR-50", price: "130.00", cost: "95.00" },
-        { name: "Shan Nihari 50g", sku: "SHN-NIH-50", price: "135.00", cost: "98.00" },
-        { name: "National Salt 800g", sku: "NAT-SLT", price: "65.00", cost: "48.00" },
-        { name: "Dalda Oil 1L", sku: "DLD-OIL", price: "520.00", cost: "450.00" },
+        {
+          name: "Shan Biryani 50g",
+          sku: "SHN-BIR-50",
+          price: "130.00",
+          cost: "95.00",
+        },
+        {
+          name: "Shan Nihari 50g",
+          sku: "SHN-NIH-50",
+          price: "135.00",
+          cost: "98.00",
+        },
+        {
+          name: "National Salt 800g",
+          sku: "NAT-SLT",
+          price: "65.00",
+          cost: "48.00",
+        },
+        {
+          name: "Dalda Oil 1L",
+          sku: "DLD-OIL",
+          price: "520.00",
+          cost: "450.00",
+        },
 
         // Bakery (15-20% margin)
-        { name: "Dawn Bread Large", sku: "DWN-BRD", price: "160.00", cost: "135.00" },
+        {
+          name: "Dawn Bread Large",
+          sku: "DWN-BRD",
+          price: "160.00",
+          cost: "135.00",
+        },
         { name: "Nimco Rusk", sku: "NMC-RSK", price: "180.00", cost: "155.00" },
 
         // Cleaning (20-25% margin)
-        { name: "Surf Excel 1kg", sku: "SRF-1K", price: "680.00", cost: "550.00" },
+        {
+          name: "Surf Excel 1kg",
+          sku: "SRF-1K",
+          price: "680.00",
+          cost: "550.00",
+        },
         { name: "Ariel 1kg", sku: "ARL-1K", price: "720.00", cost: "580.00" },
-        { name: "Harpic 500ml", sku: "HRP-500", price: "280.00", cost: "230.00" },
+        {
+          name: "Harpic 500ml",
+          sku: "HRP-500",
+          price: "280.00",
+          cost: "230.00",
+        },
         { name: "Vim Bar", sku: "VIM-BAR", price: "45.00", cost: "32.00" },
 
         // Rice & Grains (15-20% margin)
-        { name: "Basmati 5kg", sku: "RIC-BAS-5K", price: "1850.00", cost: "1600.00" },
-        { name: "Sella Rice 5kg", sku: "RIC-SEL-5K", price: "1650.00", cost: "1450.00" },
+        {
+          name: "Basmati 5kg",
+          sku: "RIC-BAS-5K",
+          price: "1850.00",
+          cost: "1600.00",
+        },
+        {
+          name: "Sella Rice 5kg",
+          sku: "RIC-SEL-5K",
+          price: "1650.00",
+          cost: "1450.00",
+        },
 
         // Snacks (25-30% margin)
-        { name: "Peek Freans Sooper", sku: "PKF-SPR", price: "120.00", cost: "90.00" },
-        { name: "Kolson Slanty", sku: "KOL-SLN", price: "60.00", cost: "45.00" },
+        {
+          name: "Peek Freans Sooper",
+          sku: "PKF-SPR",
+          price: "120.00",
+          cost: "90.00",
+        },
+        {
+          name: "Kolson Slanty",
+          sku: "KOL-SLN",
+          price: "60.00",
+          cost: "45.00",
+        },
         { name: "Lays Chips", sku: "LAY-CHP", price: "80.00", cost: "60.00" },
 
         // Personal Care (20-25% margin)
-        { name: "Lux Soap 3pk", sku: "LUX-3PK", price: "210.00", cost: "175.00" },
+        {
+          name: "Lux Soap 3pk",
+          sku: "LUX-3PK",
+          price: "210.00",
+          cost: "175.00",
+        },
         { name: "Lifebuoy Soap", sku: "LFB-SP", price: "75.00", cost: "58.00" },
-        { name: "Closeup 150g", sku: "CLU-150", price: "240.00", cost: "195.00" },
+        {
+          name: "Closeup 150g",
+          sku: "CLU-150",
+          price: "240.00",
+          cost: "195.00",
+        },
 
         // Additional essentials
-        { name: "Atta 10kg", sku: "ATT-10K", price: "1450.00", cost: "1280.00" },
+        {
+          name: "Atta 10kg",
+          sku: "ATT-10K",
+          price: "1450.00",
+          cost: "1280.00",
+        },
         { name: "Sugar 1kg", sku: "SGR-1K", price: "140.00", cost: "120.00" },
       ])
       .returning({
@@ -81,13 +171,19 @@ export async function seedDatabase() {
     await db.insert(schema.inventory).values(
       createdProducts.map((product) => {
         // Higher stock for fast-moving items, lower for slow-moving
-        const baseStock = product.name.includes("Milk") || product.name.includes("Bread") ? 80 : 50;
+        const baseStock =
+          product.name.includes("Milk") || product.name.includes("Bread")
+            ? 80
+            : 50;
         const variance = Math.floor(Math.random() * 40);
 
         return {
           productId: product.id,
           quantity: baseStock + variance,
-          minStockLevel: product.name.includes("Milk") || product.name.includes("Bread") ? 20 : 15,
+          minStockLevel:
+            product.name.includes("Milk") || product.name.includes("Bread")
+              ? 20
+              : 15,
         };
       }),
     );
@@ -99,9 +195,21 @@ export async function seedDatabase() {
       { amount: "35000.00", category: "RENT", description: "Shop Rent" },
       { amount: "8500.00", category: "UTILITIES", description: "Bijli Bill" },
       { amount: "4200.00", category: "UTILITIES", description: "Gas Bill" },
-      { amount: "45000.00", category: "SALARIES", description: "Malik Tankhwa" },
-      { amount: "18000.00", category: "SALARIES", description: "Helper Salary" },
-      { amount: "3500.00", category: "MARKETING", description: "Pamphlet Print" },
+      {
+        amount: "45000.00",
+        category: "SALARIES",
+        description: "Malik Tankhwa",
+      },
+      {
+        amount: "18000.00",
+        category: "SALARIES",
+        description: "Helper Salary",
+      },
+      {
+        amount: "3500.00",
+        category: "MARKETING",
+        description: "Pamphlet Print",
+      },
       { amount: "800.00", category: "OTHER", description: "Transport" },
     ]);
 
@@ -158,7 +266,10 @@ export async function seedDatabase() {
         })),
       );
 
-      return { totalAmount: totalAmount.toFixed(2), totalProfit: totalProfit.toFixed(2) };
+      return {
+        totalAmount: totalAmount.toFixed(2),
+        totalProfit: totalProfit.toFixed(2),
+      };
     }
 
     // Create realistic transaction mix (20 transactions)
@@ -412,8 +523,14 @@ export async function seedDatabase() {
     console.log(`✓ Created ${transactions.length} transactions`);
 
     // Calculate and display summary
-    const totalRevenue = transactions.reduce((sum, t) => sum + parseFloat(t.totalAmount), 0);
-    const totalGrossProfit = transactions.reduce((sum, t) => sum + parseFloat(t.totalProfit), 0);
+    const totalRevenue = transactions.reduce(
+      (sum, t) => sum + parseFloat(t.totalAmount),
+      0,
+    );
+    const totalGrossProfit = transactions.reduce(
+      (sum, t) => sum + parseFloat(t.totalProfit),
+      0,
+    );
     const totalExpenses = 115000; // Sum of all expenses
 
     console.log("\nSeeding Summary:");
@@ -421,8 +538,12 @@ export async function seedDatabase() {
     console.log(`Total Revenue:      Rs. ${totalRevenue.toFixed(2)}`);
     console.log(`Total Gross Profit: Rs. ${totalGrossProfit.toFixed(2)}`);
     console.log(`Total Expenses:     Rs. ${totalExpenses.toFixed(2)}`);
-    console.log(`Net Profit:         Rs. ${(totalGrossProfit - totalExpenses).toFixed(2)}`);
-    console.log(`Profit Margin:      ${((totalGrossProfit / totalRevenue) * 100).toFixed(2)}%`);
+    console.log(
+      `Net Profit:         Rs. ${(totalGrossProfit - totalExpenses).toFixed(2)}`,
+    );
+    console.log(
+      `Profit Margin:      ${((totalGrossProfit / totalRevenue) * 100).toFixed(2)}%`,
+    );
     console.log("\nDatabase seeded successfully with realistic data!");
   } catch (error) {
     console.error("Failed to seed database:", error);

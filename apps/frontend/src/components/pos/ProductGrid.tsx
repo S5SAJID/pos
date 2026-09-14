@@ -76,9 +76,7 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
             icon={<Icon icon={Search} />}
             title="No results found"
             description="Try a different name or SKU."
-            actions={
-              <Button label="Clear search" onClick={() => setSearch('')} />
-            }
+            actions={<Button label="Clear search" onClick={() => setSearch('')} />}
           />
         </Center>
       ) : (
@@ -129,12 +127,10 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
 
                   <HStack vAlign="center" hAlign="between">
                     <Text weight="bold">{product.name}</Text>
-                    {cartQty !== undefined && <Badge label={String(cartQty)}/>}
+                    {cartQty !== undefined && <Badge label={String(cartQty)} />}
                   </HStack>
 
-                  <Text type="label">
-                    Rs. {parseFloat(product.price).toFixed(2)}
-                  </Text>
+                  <Text type="label">Rs. {parseFloat(product.price).toFixed(2)}</Text>
                 </VStack>
               </ClickableCard>
             )

@@ -8,12 +8,7 @@ import mkcert from 'vite-plugin-mkcert'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [
-    devtools(),
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
-    viteReact(),
-    mkcert(),
-  ],
+  plugins: [devtools(), tanstackRouter({ target: 'react', autoCodeSplitting: true }), viteReact(), mkcert()],
 })
 
 export default config
