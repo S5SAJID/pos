@@ -101,7 +101,9 @@ export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalP
       return await res.json()
     },
     onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['report'] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       onOpenChange(false)
       toast({
         type: 'info',
@@ -307,6 +309,8 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
+      queryClient.invalidateQueries({ queryKey: ['report'] })
       onOpenChange(false)
       toast({
         type: 'info',
@@ -463,6 +467,8 @@ export function DeleteProductModal({ product, isOpen, onOpenChange }: DeleteProd
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
+      queryClient.invalidateQueries({ queryKey: ['report'] })
       onOpenChange(false)
       toast({
         type: 'info',

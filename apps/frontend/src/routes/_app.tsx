@@ -5,7 +5,18 @@ import { useThemeChanger } from '#/providers/theme.tsx'
 import { IconButton } from '@astryxdesign/core'
 import { AppShell } from '@astryxdesign/core/AppShell'
 import { SideNav, SideNavItem, SideNavSection } from '@astryxdesign/core/SideNav'
-import { Boxes, Monitor, Moon, Package, ReceiptText, ShoppingCart, Sun, Wallet, type LucideIcon } from 'lucide-react'
+import {
+  BarChart2,
+  Boxes,
+  Monitor,
+  Moon,
+  Package,
+  ReceiptText,
+  ShoppingCart,
+  Sun,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react'
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: async ({ context }) => {
@@ -76,6 +87,10 @@ const SideNavItems: SideNavGroup[] = [
       { href: '/inventory', icon: Boxes, title: 'Inventory' },
       { href: '/expenses', icon: Wallet, title: 'Expenses' },
     ],
+  },
+  {
+    name: 'Analytics',
+    items: [{ href: '/reports', icon: BarChart2, title: 'Reports' }],
   },
 ]
 
