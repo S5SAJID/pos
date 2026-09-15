@@ -147,6 +147,7 @@ export function AddInventoryModal({ isOpen, onOpenChange, preselectedProductId }
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['report'] })
       onOpenChange(false)
       const pName = selectedProduct?.name ?? 'Product'
       toast({
@@ -415,6 +416,7 @@ export function UpdateInventoryModal({ inventoryItem, isOpen, onOpenChange }: Up
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['report'] })
       onOpenChange(false)
       toast({
         type: 'info',

@@ -113,6 +113,7 @@ export function AddExpenseModal({ isOpen, onOpenChange }: AddExpenseModalProps) 
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      queryClient.invalidateQueries({ queryKey: ['report'] })
       onOpenChange(false)
       toast({
         type: 'info',

@@ -42,7 +42,7 @@ type ExpensesResponse = {
   pages: number
 }
 
-const PAGE_SIZE = 15
+const PAGE_SIZE = 18
 
 const CATEGORY_OPTIONS = [
   { value: 'ALL', label: 'All Categories' },

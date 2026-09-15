@@ -51,6 +51,7 @@ function RouteComponent() {
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
+      queryClient.invalidateQueries({ queryKey: ['report'] })
 
       const orderId = 'transactionId' in data && typeof data.transactionId === 'string' ? data.transactionId : 'unknown'
 
