@@ -5,16 +5,35 @@ import { Hono } from "hono";
 import type { HonoEnv } from "../middlewares/session-middleware";
 import { formatSchemaForAI } from "../lib/schema-to-md";
 import * as schema from "../db/schema";
-import { Parser, type From } from "node-sql-parser";
+import { Parser } from "node-sql-parser";
 import { getTableNamesFromSchema } from "../lib/table-names";
+import { db } from "../db";
 
 const app = new Hono<HonoEnv>();
+app.use("/*", async (c, next) => {
+  const { auth_token } = c.req.query();
+  if (!auth_token) {
+    return c.text("Authentication token query is required", 401);
+  }
+  const serverPassword = Bun.env.MCP_PASSWORD;
+  if (!serverPassword) {
+    return c.text("MCP server is not configured yet", 501);
+  }
+  if (serverPassword !== auth_token) {
+    return c.text("authentication token is invalid", 401);
+  }
+
+  await next();
+});
 
 const mcphandler = createMcpHandler(
   (server) => {
     (server.registerTool(
       "init_pos",
-      { description: "always run this tool first when using this plugin" },
+      {
+        description:
+          "CRITICAL: You MUST execute this tool first before calling any other tool in this plugin. It fetches the database schema required to construct valid queries.",
+      },
       async () => {
         return {
           content: [
@@ -29,9 +48,9 @@ const mcphandler = createMcpHandler(
       server.registerTool(
         "query_db",
         {
-          title: "Run Database Mutation",
+          title: "Run Database Query",
           description:
-            "Executes raw postgresql SQL SELECT statements. Use this for fetching data, complex filtering, joins, and aggregations based on the provided schema context. One statement at a time. Always include `limit` with query. Always read the db schema resource first by calling `init_pos` tool to understand table structure.",
+            "The complete PostgreSQL SELECT statement. Use this for fetching data, complex filtering, joins, and aggregations based on the provided schema context. You MUST explicitly include a 'LIMIT' clause (maximum 100 rows). Example: 'SELECT * FROM products WHERE price > 10 LIMIT 50'",
           inputSchema: {
             query: z
               .string()
@@ -43,21 +62,34 @@ const mcphandler = createMcpHandler(
           },
         },
         async (input) => {
-          console.log(input.query);
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify(sql.raw(input.query).getSQL(), null, 2),
-              },
-            ],
-          };
+          try {
+            const results = await db.execute(sql.raw(input.query));
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(results.rows, null, 2),
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "An error occured" + (error as Error).message,
+                },
+              ],
+            };
+          }
         },
       ));
   },
   {
-    instructions:
-      "This is the pos tool of the users store. Use this tool when the user ask about his store products, performance, or any thing related to his store.",
+    instructions: `This is the POS tool for the user's store. Use it when the user asks about store products, performance, or inventory.
+CRITICAL SQL RULES:
+0. STRICT RULE: You are forbidden from running 'query_db' until you have successfully called 'init_pos' in the current session.
+1. Use the exact table structures provided in the schema context. Do not guess column names.`,
     serverInfo: {
       name: "S5POS MCP Server",
       version: "0.1.0",
@@ -88,6 +120,17 @@ function validateAndCleanSelectQuery(rawSql: string): string | undefined {
     if (queryObj.type !== "select") {
       throw new Error(
         "Security Exception: Only read-only SELECT statements are allowed.",
+      );
+    }
+
+    if (
+      (queryObj as any).into &&
+      ((queryObj as any).into.position ||
+        Object.keys((queryObj as any).into).length > 1 ||
+        (queryObj as any).into.target)
+    ) {
+      throw new Error(
+        "Security Exception: Table creation or copying via INTO is prohibited.",
       );
     }
 
@@ -124,10 +167,62 @@ function validateAndCleanSelectQuery(rawSql: string): string | undefined {
       }
     }
 
+    function scanASTNode(node: any) {
+      if (!node || typeof node !== "object") return;
+
+      // Handle arrays (like the 'from' array or 'columns' array)
+      if (Array.isArray(node)) {
+        for (const item of node) {
+          scanASTNode(item);
+        }
+        return;
+      }
+
+      // Check Table Names (Catches top-level tables, subquery tables, and join tables)
+      if (node.table && typeof node.table === "string") {
+        const tableName = node.table.toLowerCase();
+
+        if (NOT_ALLOWED_TABLES.includes(tableName)) {
+          throw new Error(
+            `Safety Exception: Authentication table "${node.table}" is not allowed to be read.`,
+          );
+        }
+
+        if (!allowedTableNames.includes(tableName)) {
+          throw new Error(
+            `Safety Exception: Table "${node.table}" is not available in the schema.`,
+          );
+        }
+      }
+
+      // Check Functions (Catches mutators or timing anomalies like pg_sleep everywhere)
+      if (node.type === "function" || node.type === "aggr_func") {
+        // Option: allow specific basic math/aggregate functions if explicitly needed, e.g. COUNT
+        const safeWhitelistedFuncs = ["count", "sum", "avg", "min", "max"];
+        const funcName = (node.name || "").toLowerCase();
+
+        if (!safeWhitelistedFuncs.includes(funcName)) {
+          throw new Error(
+            "Safety Exception: Structural changes or dangerous PostgreSQL functions are prohibited.",
+          );
+        }
+      }
+
+      // Recursively dive into all properties of this object (e.g., node.where, node.left, node.ast)
+      for (const key in node) {
+        if (Object.prototype.hasOwnProperty.call(node, key)) {
+          scanASTNode(node[key]);
+        }
+      }
+    }
+
+    // Run the deep scan across the entire structure
+    scanASTNode(queryObj);
+
     return parser.sqlify(queryObj);
   } catch (err: any) {
     throw new Error(
-      "Invalid SQL syntsax. " + err.message || "Invalid SQL syntax.",
+      "Invalid SQL syntax. " + err.message || "Invalid SQL syntax.",
     );
   }
 }
