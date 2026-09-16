@@ -10,6 +10,7 @@ import inventoryHandler from "./endpoints/inventory";
 import transactionsHandler from "./endpoints/transactions";
 import expensesHandler from "./endpoints/expenses";
 import reportHandler from "./endpoints/report";
+import mcpHandler from "./endpoints/mcp";
 
 const app = new Hono<HonoEnv>()
   .use(
@@ -25,7 +26,8 @@ const app = new Hono<HonoEnv>()
   .route("/data/inventory", inventoryHandler)
   .route("/data/transactions", transactionsHandler)
   .route("/data/expenses", expensesHandler)
-  .route("/data/report", reportHandler);
+  .route("/data/report", reportHandler)
+  .route("/ai/*", mcpHandler);
 
 export default app;
 export type AppType = typeof app;
