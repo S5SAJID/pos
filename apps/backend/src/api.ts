@@ -27,7 +27,7 @@ const app = new Hono<HonoEnv>()
   .route("/data/transactions", transactionsHandler)
   .route("/data/expenses", expensesHandler)
   .route("/data/report", reportHandler)
-  .route("/ai/*", mcpHandler);
+  .route("/ai/", mcpHandler);
 
 export default app;
 export type AppType = typeof app;
