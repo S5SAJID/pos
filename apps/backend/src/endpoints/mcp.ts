@@ -8,6 +8,7 @@ import * as schema from "../db/schema";
 import { Parser } from "node-sql-parser";
 import { getTableNamesFromSchema } from "../lib/table-names";
 import { db } from "../db";
+import { readOnlyDB } from "../db/readonly-db";
 
 const app = new Hono<HonoEnv>();
 app.use("/*", async (c, next) => {
@@ -59,7 +60,7 @@ const mcphandler = createMcpHandler(
         },
         async (input) => {
           try {
-            const results = await db.execute(sql.raw(input.query));
+            const results = await readOnlyDB.execute(sql.raw(input.query));
             return {
               content: [
                 {
@@ -100,7 +101,6 @@ function validateAndCleanSelectQuery(rawSql: string): string | undefined {
   const parser = new Parser();
   // clean the basics
   const cleanedSql = rawSql.trim().replace(/;\s*$/, "");
-  const NOT_ALLOWED_TABLES = ["account", "session", "users", "verification"];
 
   try {
     const ast = parser.astify(cleanedSql, { database: "Postgresql" });
@@ -116,10 +116,6 @@ function validateAndCleanSelectQuery(rawSql: string): string | undefined {
       throw new Error("Security Exception: Only read-only SELECT statements are allowed.");
     }
 
-    if ((queryObj as any).into && ((queryObj as any).into.position || Object.keys((queryObj as any).into).length > 1 || (queryObj as any).into.target)) {
-      throw new Error("Security Exception: Table creation or copying via INTO is prohibited.");
-    }
-
     if (!queryObj.limit) {
       throw new Error("Safety Exception: Limit should be included in query to avoid large result sets.");
     }
@@ -128,73 +124,6 @@ function validateAndCleanSelectQuery(rawSql: string): string | undefined {
     if (typeof limitVal !== "number" || limitVal < 1 || limitVal > 100) {
       throw new Error("Safety Exception: Queries must specify an explicit LIMIT between 1 and 100.");
     }
-
-    const tables = queryObj.from as any[];
-
-    for (const table of tables) {
-      if (NOT_ALLOWED_TABLES.some((val) => val === table.table)) {
-        throw new Error("Safety Exception: Authentication tables are not allowed to be read.");
-      }
-    }
-
-    const allowedTableNames = getTableNamesFromSchema();
-    for (const table of tables) {
-      if (!allowedTableNames.includes(table.table)) {
-        throw new Error("Safety Exception: Only tables returned by the init_pos tool are available.");
-      }
-    }
-
-    for (const col of queryObj.columns) {
-      if (col.expr.type === "function") {
-        throw new Error("Safety Exception: Data modification, structural changes, or dangerous PostgreSQL functions are prohibited");
-      }
-    }
-
-    function scanASTNode(node: any) {
-      if (!node || typeof node !== "object") return;
-
-      // Handle arrays (like the 'from' array or 'columns' array)
-      if (Array.isArray(node)) {
-        for (const item of node) {
-          scanASTNode(item);
-        }
-        return;
-      }
-
-      // Check Table Names (Catches top-level tables, subquery tables, and join tables)
-      if (node.table && typeof node.table === "string") {
-        const tableName = node.table.toLowerCase();
-
-        if (NOT_ALLOWED_TABLES.includes(tableName)) {
-          throw new Error(`Safety Exception: Authentication table "${node.table}" is not allowed to be read.`);
-        }
-
-        if (!allowedTableNames.includes(tableName)) {
-          throw new Error(`Safety Exception: Table "${node.table}" is not available in the schema.`);
-        }
-      }
-
-      // Check Functions (Catches mutators or timing anomalies like pg_sleep everywhere)
-      if (node.type === "function") {
-        // Option: allow specific basic math/aggregate functions if explicitly needed, e.g. COUNT
-        const safeWhitelistedFuncs = ["count", "sum", "avg", "min", "max"];
-        const funcName = (node.name || "").toLowerCase();
-
-        if (!safeWhitelistedFuncs.includes(funcName)) {
-          throw new Error("Safety Exception: Structural changes or dangerous PostgreSQL functions are prohibited.");
-        }
-      }
-
-      // Recursively dive into all properties of this object (e.g., node.where, node.left, node.ast)
-      for (const key in node) {
-        if (Object.prototype.hasOwnProperty.call(node, key)) {
-          scanASTNode(node[key]);
-        }
-      }
-    }
-
-    // Run the deep scan across the entire structure
-    scanASTNode(queryObj);
 
     return parser.sqlify(queryObj);
   } catch (err: any) {
