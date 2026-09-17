@@ -32,6 +32,41 @@ Start the server
   bun dev
 ```
 
+## MCP Readonly user:
+
+To allow readonly access for the mcp, you need to create a new user with only read permission.
+
+```sql
+-- Create the account
+CREATE USER mcp_readonly WITH PASSWORD 'PASSWORD';
+
+GRANT CONNECT ON DATABASE neondb TO mcp_readonly;
+
+
+-- Prevent them from ever doing a write operation
+ALTER USER mcp_readonly SET default_transaction_read_only = on;
+
+-- Kill any query they run that takes longer than 15 seconds (15000 milliseconds)
+ALTER USER mcp_readonly SET statement_timeout = 10000;
+
+-- Kill any transaction that sits idle inside a lock for too long
+ALTER USER mcp_readonly SET idle_in_transaction_session_timeout = 15000;
+
+-- Limit the memory they can use for sorting/hashes so they don't eat up server RAM
+ALTER USER mcp_readonly SET work_mem = '150MB';
+
+-- Grant read-only access to all current and future data
+GRANT pg_read_all_data TO mcp_readonly;
+
+```
+
+Confirm created by running
+
+```sql
+SELECT usename AS username, usesuper AS is_superuser, usecreatedb AS can_create_db
+FROM pg_catalog.pg_user;
+```
+
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file

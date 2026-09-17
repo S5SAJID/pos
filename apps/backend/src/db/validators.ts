@@ -1,11 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import {
-  expenses,
-  inventory,
-  paymentMethodEnum,
-  products,
-} from "./schema";
+import { expenses, inventory, paymentMethodEnum, products } from "./schema";
 
 const priceSchema = z
   .string()
