@@ -1,5 +1,6 @@
 import { shopConfig } from '#/lib/shop-config.ts'
 import { createRoot } from 'react-dom/client'
+import { getRandomQuote } from './quotes'
 
 export interface ReceiptItem {
   name: string
@@ -22,6 +23,8 @@ export function printReciept(data: ReceiptData) {
     return
   }
 
+  const quote = getRandomQuote()
+
   const container = newWindow.document.createElement('div')
   newWindow.document.body.appendChild(container)
 
@@ -30,7 +33,7 @@ export function printReciept(data: ReceiptData) {
   newWindow.document.head.appendChild(styleEl)
 
   const root = createRoot(container)
-  root.render(<ReceiptDocument data={data} />)
+  root.render(<ReceiptDocument data={data} quoteText={quote.quote} quoteTheme={quote.theme} />)
 
   setTimeout(() => {
     newWindow.focus()
@@ -42,7 +45,15 @@ export function printReciept(data: ReceiptData) {
   })
 }
 
-function ReceiptDocument({ data }: { data: ReceiptData }) {
+function ReceiptDocument({
+  data,
+  quoteText,
+  quoteTheme,
+}: {
+  data: ReceiptData
+  quoteText: string
+  quoteTheme: string
+}) {
   const { name, address, phone, currency, tagline } = shopConfig
   const { orderId, items, total, paymentMethod, createdAt } = data
   const dateStr = createdAt.toLocaleDateString()
@@ -123,6 +134,12 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
       <div className="center small bold">{data.orderId}</div>
       <div className="divider" />
 
+      <div className="quote-box">
+        <div className="center bold">A Quote for you on {quoteTheme}.</div>
+        <div className="quote-text center">“{quoteText}”</div>
+      </div>
+
+      <div className="divider" />
       <div className="center">Thank you for your purchase!</div>
       <div className="center small">Please come again</div>
     </div>

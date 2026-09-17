@@ -224,7 +224,7 @@ export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalP
           }
           footer={
             <LayoutFooter hasDivider>
-              <HStack gap={2} hAlign="end" padding={3}>
+              <HStack gap={2} hAlign="end">
                 <Button
                   label="Cancel"
                   variant="ghost"
@@ -419,7 +419,7 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
           }
           footer={
             <LayoutFooter hasDivider>
-              <HStack gap={2} hAlign="end" padding={3}>
+              <HStack gap={2} hAlign="end">
                 <Button
                   label="Cancel"
                   variant="ghost"
