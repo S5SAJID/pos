@@ -14,7 +14,8 @@
     "build:api": "bun build src/api.ts --outdir dist --minify --target=bun --external=util/types --external=tls --external=dns --external=net --external=crypto",
     "db:push": "bun drizzle-kit push",
     "db:studio": "bun drizzle-kit studio",
-    "db:seed": "bun run --bun src/db/seed.ts"
+    "db:seed": "bun run --bun src/db/seed.ts",
+    "format": "bun prettier . --print-width 80 --write"
   },
   "dependencies": {
     "@better-auth/telemetry": "^1.7.2",

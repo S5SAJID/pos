@@ -5,6 +5,7 @@
   - [x] DELETE
   - [x] CREATE
 - [x] Connect it with the products api
+- [x] Create & push to new DB branch
 - [ ] Implement category table
 - [ ] Implement crud modals
 - [ ] Implement pos screen with it

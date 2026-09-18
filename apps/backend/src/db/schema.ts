@@ -20,7 +20,7 @@ export const products = snakeCase.table(
     sku: varchar({ length: 255 }),
     price: numeric({ precision: 10, scale: 2 }).notNull(),
     cost: numeric({ precision: 10, scale: 2 }).notNull(),
-    categoryId: varchar().references(() => categories.id, {
+    categoryId: uuid().references(() => categories.id, {
       onDelete: "set null",
     }),
     isDeleted: boolean().default(false).notNull(),

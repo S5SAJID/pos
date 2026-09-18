@@ -41,10 +41,11 @@ const app = new Hono<HonoEnv>()
   .put("/", zValidator("json", categorySelectSchema), async (c) => {
     const data = c.req.valid("json");
     try {
-      const result = db
+      const result = await db
         .update(categories)
         .set(data)
-        .where(eq(categories.id, data.id));
+        .where(eq(categories.id, data.id))
+        .returning();
       return c.json({
         success: true,
         data: result,
@@ -63,6 +64,9 @@ const app = new Hono<HonoEnv>()
     const id = c.req.param("id");
     try {
       await db.delete(categories).where(eq(categories.id, id));
+      return c.json({
+        success: true,
+      });
     } catch (error) {
       return c.json(
         {
