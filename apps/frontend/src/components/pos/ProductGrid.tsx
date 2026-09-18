@@ -62,6 +62,7 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
       <TextInput
         label="Search products"
         isLabelHidden
+        hasAutoFocus
         startIcon={Search}
         placeholder="Search by name or SKU..."
         value={search}

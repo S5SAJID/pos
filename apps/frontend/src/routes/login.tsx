@@ -26,7 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 const pageStyle: CSSProperties = {
   minHeight: '100vh',
-  backgroundImage: `url("/background.avif")`,
+  backgroundImage: `url("/glass-6.jpg")`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
 }
@@ -39,8 +39,8 @@ function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'hayakhan.45@gmail.com',
-      password: 'idontknowwhyiusedhayasname',
+      email: '',
+      password: '',
     },
   })
 
