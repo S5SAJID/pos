@@ -1,3 +1,4 @@
+import { z } from "better-auth";
 import {
   expenses,
   products,
@@ -8,6 +9,7 @@ import {
   transactionItems,
   transactions,
 } from "./schema";
+import { categorySchema, categorySelectSchema } from "./validators";
 
 export type Expense = typeof expenses.$inferSelect;
 export type ExpenseInsert = typeof expenses.$inferInsert;
@@ -27,3 +29,6 @@ export type TransactionInsert = typeof transactions.$inferInsert;
 export type ExpenseCategory = (typeof categoryEnum.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
 export type TransactionStatus = typeof transactionStatusEnum.enumValues;
+
+export type Category = z.input<typeof categorySelectSchema>;
+export type CategoryInsert = z.input<typeof categorySchema>;

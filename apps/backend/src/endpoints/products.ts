@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { HonoEnv } from "../middlewares/session-middleware";
 import { db } from "../db";
-import { inventory, products } from "../db/schema";
+import { categories, inventory, products } from "../db/schema";
 import { desc, eq, getColumns, sql } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { productSchema, productSelectSchema } from "../db/validators";
@@ -16,9 +16,11 @@ const app = new Hono<HonoEnv>()
         ),
         minStockLevel:
           sql<number>`coalesce(${inventory.minStockLevel}, 0)`.mapWith(Number),
+        category: getColumns(categories),
       })
       .from(products)
       .leftJoin(inventory, eq(products.id, inventory.productId))
+      .leftJoin(categories, eq(products.categoryId, categories.id))
       .where(eq(products.isDeleted, false))
       .orderBy(desc(products.createdAt));
     return c.json(results);

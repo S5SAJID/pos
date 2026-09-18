@@ -1,6 +1,12 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { expenses, inventory, paymentMethodEnum, products } from "./schema";
+import {
+  categories,
+  expenses,
+  inventory,
+  paymentMethodEnum,
+  products,
+} from "./schema";
 
 const priceSchema = z
   .string()
@@ -49,4 +55,14 @@ export const transactionSchema = z.object({
     .refine((items) => new Set(items.map((e) => e.id)).size === items.length, {
       error: "Duplicate product IDs in items",
     }),
+});
+
+export const categorySchema = createInsertSchema(categories, {
+  updatedAt: z.iso.datetime().pipe(z.coerce.date()).optional(),
+  createdAt: z.iso.datetime().pipe(z.coerce.date()).optional(),
+});
+
+export const categorySelectSchema = createSelectSchema(categories, {
+  updatedAt: z.iso.datetime().pipe(z.coerce.date()),
+  createdAt: z.iso.datetime().pipe(z.coerce.date()),
 });

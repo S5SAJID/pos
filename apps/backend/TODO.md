@@ -1,0 +1,10 @@
+- [x] Add category table
+- [x] Implement database api for it
+  - [x] READ
+  - [x] UPDATE
+  - [x] DELETE
+  - [x] CREATE
+- [x] Connect it with the products api
+- [ ] Implement category table
+- [ ] Implement crud modals
+- [ ] Implement pos screen with it

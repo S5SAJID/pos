@@ -1,6 +1,7 @@
 import { timestamp } from "drizzle-orm/cockroach-core";
 import {
   boolean,
+  index,
   integer,
   numeric,
   pgEnum,
@@ -11,35 +12,63 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./auth.schema";
 
-export const products = snakeCase.table("products", {
-  id: uuid().primaryKey().defaultRandom(),
-  name: varchar({ length: 255 }).notNull(),
-  sku: varchar({ length: 255 }),
-  price: numeric({ precision: 10, scale: 2 }).notNull(),
-  cost: numeric({ precision: 10, scale: 2 }).notNull(),
-  isDeleted: boolean().default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+export const products = snakeCase.table(
+  "products",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    name: varchar({ length: 255 }).notNull(),
+    sku: varchar({ length: 255 }),
+    price: numeric({ precision: 10, scale: 2 }).notNull(),
+    cost: numeric({ precision: 10, scale: 2 }).notNull(),
+    categoryId: varchar().references(() => categories.id, {
+      onDelete: "set null",
+    }),
+    isDeleted: boolean().default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("products_deleted_created_idx").on(table.isDeleted, table.createdAt),
+  ],
+);
 
-export const inventory = snakeCase.table("inventory", {
-  id: uuid().primaryKey().defaultRandom(),
-  productId: uuid()
-    .references(() => products.id)
-    .notNull(),
-  quantity: integer().notNull(),
-  minStockLevel: integer()
-    .$default(() => 0)
-    .notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+export const categories = snakeCase.table(
+  "categories",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    name: varchar({ length: 255 }).notNull(),
+    icon: varchar({ length: 255 }).notNull().default("package"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("category_created_idx").on(table.createdAt)],
+);
+
+export const inventory = snakeCase.table(
+  "inventory",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    productId: uuid()
+      .references(() => products.id)
+      .notNull(),
+    quantity: integer().notNull(),
+    minStockLevel: integer()
+      .$default(() => 0)
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("inventory_product_id_idx").on(table.productId)],
+);
 
 export const categoryEnum = pgEnum("category", [
   "RENT",
