@@ -457,16 +457,16 @@ function RouteComponent() {
               </VStack>
               <HStack gap={1} vAlign="center">
                 {isFetching && <Spinner size="sm" />}
-              <SegmentedControl
-                label="Report period"
-                value={period}
-                onChange={(val) => setPeriod(val as Period)}
-                size="sm"
-              >
-                {Object.entries(PERIOD_LABELS).map(([val, label]) => (
-                  <SegmentedControlItem key={val} value={val} label={label} />
-                ))}
-              </SegmentedControl>
+                <SegmentedControl
+                  label="Report period"
+                  value={period}
+                  onChange={(val) => setPeriod(val as Period)}
+                  size="sm"
+                >
+                  {Object.entries(PERIOD_LABELS).map(([val, label]) => (
+                    <SegmentedControlItem key={val} value={val} label={label} />
+                  ))}
+                </SegmentedControl>
               </HStack>
             </HStack>
             {isLoading ? (

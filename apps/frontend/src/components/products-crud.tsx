@@ -10,7 +10,7 @@ import { Link } from '@astryxdesign/core/Link'
 import { TextInput } from '@astryxdesign/core/TextInput'
 import { useToast } from '@astryxdesign/core/Toast'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { Product } from '@pos/backend'
+import type { Category, Product } from '@pos/backend'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -22,6 +22,7 @@ export type RespProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
   minStockLevel: number
   createdAt: string
   updatedAt: string
+  category: Category | null
 }
 
 export const productFormSchema = z.object({

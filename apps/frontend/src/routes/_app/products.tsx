@@ -7,6 +7,8 @@ import {
 import { StockStatus } from '#/components/stock-status'
 import TableSkeleton from '#/components/table-skeleton.tsx'
 import { backendClient } from '#/lib/backend.ts'
+import { capitalize } from '#/lib/utils'
+import { Token } from '@astryxdesign/core'
 import { Button } from '@astryxdesign/core/Button'
 import { DropdownMenu } from '@astryxdesign/core/DropdownMenu'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
@@ -29,6 +31,7 @@ import { Toolbar } from '@astryxdesign/core/Toolbar'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { MoreHorizontal, Pencil, SearchIcon, ShoppingBag, Trash2 } from 'lucide-react'
+import { DynamicIcon } from 'lucide-react/dynamic'
 import { useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/_app/products')({
@@ -113,6 +116,28 @@ function RouteComponent() {
             {item.minStockLevel}
           </Text>
         ),
+      },
+      {
+        key: 'category',
+        header: 'Category',
+        width: proportional(1),
+        renderCell: (item) => {
+          const category = item.category
+          if (!category) return '—'
+
+          return (
+            <Token
+              label={capitalize(category.name)}
+              icon={
+                <Icon
+                  icon={(props) => <DynamicIcon name={category.icon as any} {...props} />}
+                  size="sm"
+                  color="inherit"
+                />
+              }
+            />
+          )
+        },
       },
       {
         key: 'createdAt',

@@ -14,6 +14,7 @@ import {
   ReceiptText,
   ShoppingCart,
   Sun,
+  TagIcon,
   Wallet,
   type LucideIcon,
 } from 'lucide-react'
@@ -65,6 +66,7 @@ type SideNavItem = {
   title: string
   icon: LucideIcon
   href: string
+  subItems?: SideNavItem[] | undefined
 }
 
 type SideNavGroup = {
@@ -83,7 +85,12 @@ const SideNavItems: SideNavGroup[] = [
   {
     name: 'Manage',
     items: [
-      { href: '/products', icon: Package, title: 'Products' },
+      {
+        href: '/products',
+        icon: Package,
+        title: 'Products',
+        subItems: [{ icon: TagIcon, href: '/categories', title: 'Categories' }],
+      },
       { href: '/inventory', icon: Boxes, title: 'Inventory' },
       { href: '/expenses', icon: Wallet, title: 'Expenses' },
     ],
@@ -107,7 +114,19 @@ function AppSideNavBar() {
               href={navItem.href}
               isSelected={navItem.href == pathname}
               key={index + navItem.title}
-            />
+            >
+              {navItem.subItems && navItem.subItems.length > 0
+                ? navItem.subItems.map((subItem) => (
+                    <SideNavItem
+                      label={subItem.title}
+                      icon={subItem.icon}
+                      href={subItem.href}
+                      isSelected={subItem.href == pathname}
+                      key={index + subItem.title}
+                    />
+                  ))
+                : null}
+            </SideNavItem>
           ))}
         </SideNavSection>
       ))}
