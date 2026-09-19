@@ -1,21 +1,24 @@
 import { backendClient } from '#/lib/backend.ts'
+import { LocalDynamicIcon } from '#/components/pos/LocalDynamicIcon.tsx'
 import { Text } from '@astryxdesign/core/Text'
 import { AlertDialog } from '@astryxdesign/core/AlertDialog'
 import { Button } from '@astryxdesign/core/Button'
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { FormLayout } from '@astryxdesign/core/FormLayout'
 import { InputGroup, InputGroupText } from '@astryxdesign/core/InputGroup'
+import { Icon } from '@astryxdesign/core/Icon'
 import { HStack, Layout, LayoutContent, LayoutFooter, VStack } from '@astryxdesign/core/Layout'
 import { Link } from '@astryxdesign/core/Link'
+import { Selector, SelectorOption } from '@astryxdesign/core/Selector'
 import { TextInput } from '@astryxdesign/core/TextInput'
 import { useToast } from '@astryxdesign/core/Toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { Category, Product } from '@pos/backend'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { formatPriceForApi } from '#/lib/utils'
+import { formatPriceForApi, capitalize } from '#/lib/utils'
 
 export type RespProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
   quantity: number
@@ -40,9 +43,93 @@ export const productFormSchema = z.object({
     .min(1, 'Cost price is required')
     .regex(/^\d+(\.\d{1,2})?$/, 'Please enter a valid cost (e.g. 100 or 100.00)')
     .refine((v) => Number.isFinite(Number(v)) && Number(v) >= 0, 'Cost price cannot be negative'),
+  categoryId: z.string().uuid('Please select a valid category').min(1, 'Category is required'),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>
+
+interface CategorySelectorProps {
+  value: string | undefined
+  onChange: (value: string) => void
+  error?: string
+  isRequired?: boolean
+}
+
+function CategorySelector({ value, onChange, error, isRequired }: CategorySelectorProps) {
+  const { data: categories, isLoading } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await backendClient.data.categories.$get()
+      return await res.json()
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+
+  const options =
+    categories?.map((cat) => ({
+      value: cat.id,
+      label: capitalize(cat.name),
+    })) ?? []
+
+  const categoryMap = Object.fromEntries(categories?.map((c) => [c.id, c]) ?? [])
+
+  return (
+    <Selector
+      label="Category"
+      options={options}
+      value={value}
+      onChange={onChange}
+      placeholder="Select a category..."
+      isRequired={isRequired}
+      isLoading={isLoading}
+      hasSearch
+      searchPlaceholder="Search categories..."
+      emptyText="No categories found"
+      emptySearchText="No matching categories"
+      status={error ? { type: 'error', message: error } : undefined}
+      renderOption={(option) => {
+        const cat = categoryMap[option.value]
+        return (
+          <SelectorOption
+            label={option.label}
+            icon={
+              cat
+                ? (props) => (
+                    <Icon
+                      icon={(iconProps) => <LocalDynamicIcon name={cat.icon} {...iconProps} />}
+                      size="sm"
+                      color={'inherit' as any}
+                      {...props}
+                    />
+                  )
+                : undefined
+            }
+          />
+        )
+      }}
+      renderValue={(option) => {
+        const cat = categoryMap[option.value]
+        return (
+          <SelectorOption
+            label={option.label}
+            icon={
+              cat
+                ? (props) => (
+                    <Icon
+                      icon={(iconProps) => <LocalDynamicIcon name={cat.icon} {...iconProps} />}
+                      size="sm"
+                      color={'inherit' as any}
+                      {...props}
+                    />
+                  )
+                : undefined
+            }
+          />
+        )
+      }}
+    />
+  )
+}
 
 interface CreateProductModalProps {
   isOpen: boolean
@@ -65,6 +152,7 @@ export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalP
       sku: '',
       price: '',
       cost: '',
+      categoryId: '',
     },
   })
 
@@ -75,6 +163,7 @@ export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalP
         sku: '',
         price: '',
         cost: '',
+        categoryId: '',
       })
     }
   }, [isOpen, reset])
@@ -86,6 +175,7 @@ export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalP
         sku: values.sku?.trim() || null,
         price: formatPriceForApi(values.price),
         cost: formatPriceForApi(values.cost),
+        categoryId: values.categoryId,
       }
 
       const res = await backendClient.data.products.$post({
@@ -155,6 +245,19 @@ export function CreateProductModal({ isOpen, onOpenChange }: CreateProductModalP
                         isRequired
                         hasAutoFocus
                         status={errors.name ? { type: 'error', message: errors.name.message } : undefined}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field }) => (
+                      <CategorySelector
+                        value={field.value || undefined}
+                        onChange={field.onChange}
+                        error={errors.categoryId?.message}
+                        isRequired
                       />
                     )}
                   />
@@ -266,6 +369,7 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
       sku: '',
       price: '',
       cost: '',
+      categoryId: '',
     },
   })
 
@@ -276,6 +380,7 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
         sku: product.sku ?? '',
         price: product.price ? parseFloat(product.price).toFixed(2) : '',
         cost: product.cost ? parseFloat(product.cost).toFixed(2) : '',
+        categoryId: product.categoryId ?? '',
       })
     }
   }, [product, isOpen, reset])
@@ -290,8 +395,8 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
         sku: values.sku?.trim() || null,
         price: formatPriceForApi(values.price),
         cost: formatPriceForApi(values.cost),
+        categoryId: values.categoryId,
         isDeleted: product.isDeleted,
-        categoryId: "",
         createdAt: new Date(product.createdAt),
         updatedAt: new Date(),
       }
@@ -357,6 +462,19 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
                       isRequired
                       hasAutoFocus
                       status={errors.name ? { type: 'error', message: errors.name.message } : undefined}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="categoryId"
+                  control={control}
+                  render={({ field }) => (
+                    <CategorySelector
+                      value={field.value || undefined}
+                      onChange={field.onChange}
+                      error={errors.categoryId?.message}
+                      isRequired
                     />
                   )}
                 />

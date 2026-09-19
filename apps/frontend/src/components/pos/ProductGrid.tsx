@@ -151,10 +151,10 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
                         </HStack>
                       ) : isLowStock ? (
                         <HStack gap={1} vAlign="center">
-                          <StatusDot variant="warning" label="Low stock" />
                           <Text type="supporting" color="secondary">
-                            Low stock ({qty} left)
+                            {product.category ? '• ' : null} {qty} left
                           </Text>
+                          <StatusDot variant="warning" label="Low stock" />
                         </HStack>
                       ) : (
                         <Text type="supporting" color="secondary">
