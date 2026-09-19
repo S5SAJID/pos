@@ -1,7 +1,7 @@
 import type { RespProduct } from '#/components/products-crud.tsx'
 import { useCartItems, usePosActions } from '#/lib/pos-store.ts'
 import { useDebounce } from '#/lib/use-debounce.ts'
-import { Badge } from '@astryxdesign/core/Badge'
+import { Badge, StatusDot } from '@astryxdesign/core'
 import { Button } from '@astryxdesign/core/Button'
 import { Center } from '@astryxdesign/core/Center'
 import { ClickableCard } from '@astryxdesign/core/ClickableCard'
@@ -10,11 +10,12 @@ import { Grid } from '@astryxdesign/core/Grid'
 import { Icon } from '@astryxdesign/core/Icon'
 import { HStack, VStack } from '@astryxdesign/core/Layout'
 import { Spinner } from '@astryxdesign/core/Spinner'
-import { StatusDot } from '@astryxdesign/core/StatusDot'
 import { Text } from '@astryxdesign/core/Text'
 import { TextInput } from '@astryxdesign/core/TextInput'
-import { Search, ShoppingBag } from 'lucide-react'
+import { Cherry, GridIcon, Milk, Search, ShoppingBag, Vegan } from 'lucide-react'
 import { useState } from 'react'
+import { LocalDynamicIcon } from './LocalDynamicIcon'
+import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl'
 
 interface ProductGridProps {
   products: RespProduct[]
@@ -59,18 +60,24 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
 
   return (
     <VStack gap={4}>
-      <TextInput
-        label="Search products"
-        isLabelHidden
-        hasAutoFocus
-        startIcon={Search}
-        placeholder="Search by name or SKU..."
-        value={search}
-        onChange={setSearch}
-        hasClear
-        width={250}
-      />
-
+      <HStack hAlign="between" vAlign="center">
+        <TextInput
+          label="Search products"
+          isLabelHidden
+          hasAutoFocus
+          startIcon={Search}
+          placeholder="Search by name or SKU..."
+          value={search}
+          onChange={setSearch}
+          hasClear
+          width={250}
+        />
+        <SegmentedControl size="sm" onChange={() => {}} value={'all'} label="View mode">
+          <SegmentedControlItem value="all" label="All" icon={<GridIcon />} />
+          <SegmentedControlItem value="list" label="Dairy" icon={<Milk />} />
+          <SegmentedControlItem value="table" label="Fruits" icon={<Cherry />} />
+        </SegmentedControl>
+      </HStack>
       {filtered.length === 0 ? (
         <Center minHeight={200}>
           <EmptyState
@@ -92,10 +99,11 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
 
             return (
               <ClickableCard
+                variant="muted"
                 key={product.id}
                 label={product.name}
                 isDisabled={isOutOfStock || atMax}
-                style={{ userSelect: 'none', position: 'relative' }}
+                style={{ userSelect: 'none', position: 'relative', aspectRatio: '3/2' }}
                 onClick={() =>
                   addItem({
                     productId: product.id,
@@ -105,33 +113,57 @@ export function ProductGrid({ products, isLoading }: ProductGridProps) {
                   })
                 }
               >
-                <VStack gap={1}>
-                  {isOutOfStock ? (
-                    <HStack gap={1} vAlign="center">
-                      <StatusDot variant="error" label="Sold out" />
-                      <Text type="supporting" color="secondary">
-                        Sold out
+                <VStack gap={1} vAlign="between" style={{ height: '100%' }}>
+                  <HStack hAlign="between">
+                    <VStack>
+                      <Text weight="semibold" style={{ fontSize: 'var(--font-size-md)' }}>
+                        {product.name}
                       </Text>
-                    </HStack>
-                  ) : isLowStock ? (
-                    <HStack gap={1} vAlign="center">
-                      <StatusDot variant="warning" label="Low stock" />
-                      <Text type="supporting" color="secondary">
-                        Low stock ({qty} left)
+                      <Text weight="normal" color="secondary" hasTabularNumbers>
+                        Rs. {parseFloat(product.price)}
                       </Text>
-                    </HStack>
-                  ) : (
-                    <Text type="supporting" color="secondary">
-                      {qty} in stock
-                    </Text>
-                  )}
-
-                  <HStack vAlign="center" hAlign="between">
-                    <Text weight="bold">{product.name}</Text>
-                    {cartQty !== undefined && <Badge label={String(cartQty)} />}
+                    </VStack>
                   </HStack>
 
-                  <Text type="label">Rs. {parseFloat(product.price).toFixed(2)}</Text>
+                  <HStack hAlign="between">
+                    <HStack gap={1}>
+                      {product.category && (
+                        <HStack vAlign="center" gap={0.5}>
+                          <Icon
+                            icon={(props) => (
+                              <LocalDynamicIcon
+                                name={(product.category ?? { icon: 'package' }).icon as any}
+                                {...props}
+                              />
+                            )}
+                            color="tertiary"
+                            size="sm"
+                          />
+                          <Text type="supporting">{(product.category ?? { name: 'No Category' }).name}</Text>
+                        </HStack>
+                      )}
+                      {isOutOfStock ? (
+                        <HStack gap={1} vAlign="center">
+                          <StatusDot variant="error" label="Sold out" />
+                          <Text type="supporting" color="secondary">
+                            Sold out
+                          </Text>
+                        </HStack>
+                      ) : isLowStock ? (
+                        <HStack gap={1} vAlign="center">
+                          <StatusDot variant="warning" label="Low stock" />
+                          <Text type="supporting" color="secondary">
+                            Low stock ({qty} left)
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <Text type="supporting" color="secondary">
+                          {product.category ? '• ' : null} {qty} left
+                        </Text>
+                      )}
+                    </HStack>
+                    {cartQty !== undefined && <Badge label={String(cartQty)} variant="info" />}
+                  </HStack>
                 </VStack>
               </ClickableCard>
             )

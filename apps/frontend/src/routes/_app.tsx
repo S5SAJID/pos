@@ -114,6 +114,7 @@ function AppSideNavBar() {
               href={navItem.href}
               isSelected={navItem.href == pathname}
               key={index + navItem.title}
+              collapsible={{ defaultIsCollapsed: true }}
             >
               {navItem.subItems && navItem.subItems.length > 0
                 ? navItem.subItems.map((subItem) => (

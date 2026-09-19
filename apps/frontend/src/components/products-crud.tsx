@@ -291,6 +291,7 @@ export function EditProductModal({ product, isOpen, onOpenChange }: EditProductM
         price: formatPriceForApi(values.price),
         cost: formatPriceForApi(values.cost),
         isDeleted: product.isDeleted,
+        categoryId: "",
         createdAt: new Date(product.createdAt),
         updatedAt: new Date(),
       }
